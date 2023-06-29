@@ -16,7 +16,8 @@
         "Publish-PowerShellModule"
     )
     GUID = "ffc50278-3ae6-4f6d-88b5-9aec7043bc27"
-    ModuleVersion = "0.0.1"
+    ModuleVersion = "0.0.2"
+    PowerShellVersion = "5.1"
     PrivateData = @{
         PSData = @{
             LicenseUri = "https://github.com/michielvoo/Pilot/blob/main/License.txt"
