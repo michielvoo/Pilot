@@ -66,11 +66,19 @@ Describe Join-Paths {
         }
 
         It "joins -Path and a single remaining [string[]] argument" {
+            # Arrange
+            if ($PSEdition -eq "Desktop") {
+                $expectedValue = Join-Path "parent" "child additional child"
+            }
+            else {
+                $expectedValue = Join-Path "parent" (Join-Path "child" "additional child")
+            }
+
             # Act + Assert
             $expectation = @{
                 BeExactly = $true
-                ExpectedValue = (Join-Path "parent" "child additional child")
-                Because = "single remaning array argument is implicitly converted to [string] (through  concatenation) added to the array"
+                ExpectedValue = $expectedValue
+                Because = "single remaning array argument is implicitly converted to [string] (through concatenation) added to the array"
             }
             Join-Paths "parent" @("child", "additional child") | Should @expectation
         }

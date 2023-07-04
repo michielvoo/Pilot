@@ -129,22 +129,24 @@ Describe "Parameter" {
         }
 
         Context "from [string[]]" {
-            It "results in arg.ToString() for a [string] parameter" {
-                # Arrange
-                function Get-Parameter {
-                    param (
-                        [Parameter(ValueFromRemainingArguments)]
-                        [string] $Parameter
-                    )
+            if ($PSEdition -eq "Desktop") {
+                It "results in arg.ToString() for a [string] parameter" {
+                    # Arrange
+                    function Get-Parameter {
+                        param (
+                            [Parameter(ValueFromRemainingArguments)]
+                            [string] $Parameter
+                        )
 
-                    $Parameter
+                        $Parameter
+                    }
+
+                    # Act
+                    $result = Get-Parameter @("a", "b", "c")
+
+                    # Assert
+                    $result | Should -BeExactly -ExpectedValue "System.Object[]"
                 }
-
-                # Act
-                $result = Get-Parameter @("a", "b", "c")
-
-                # Assert
-                $result | Should -Be "a b c"
             }
 
             It "results in concatenation for a [string] parameter accepting values from remaining arguments" {
