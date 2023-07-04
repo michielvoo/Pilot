@@ -3,62 +3,86 @@ BeforeAll {
 }
 
 Describe Join-Paths {
-    It "requires an argument for -Path" {
-        # Act/assert
-        { Join-Paths } | Should -Throw
+    Context "due to mandatory parameters" {
+        It "requires an argument for the -Path parameter" {
+            # Act + Assert
+            $expectation = @{
+                ErrorId = "ParameterArgumentValidationErrorEmptyStringNotAllowed,Join-Paths"
+                Because = "`$null is implicitly converted to [string]::Empty and [AllowEmptyString()] is not applied"
+            }
+            { Join-Paths $null } | Should -Throw @expectation
+        }
+
+        It "requires an argument for the -ChildPath parameter" {
+            # Act + Assert
+            $expectation = @{
+                ErrorId = "ParameterArgumentValidationErrorNullNotAllowed,Join-Paths"
+                Because = "[AllowNull()] is not applied"
+            }
+            { Join-Paths "test" -ChildPath $null } | Should -Throw @expectation
+        }
+
+        It "requires a remaining argument for the -ChildPath parameter" {
+            # Act + Assert
+            $expectation = @{
+                ErrorId = "ParameterArgumentValidationErrorEmptyStringNotAllowed,Join-Paths"
+                Because = "[AllowEmptyString()] is not applied"
+            }
+            { Join-Paths "test" $null } | Should -Throw @expectation
+        }
     }
 
-    It "does not accept null for -Path" {
-        # Act/assert
-        { Join-Paths $null } | Should -Throw
+    Context "when given argument for -ChildPath" {
+        It "joins -Path and -ChildPath" {
+            # Act + Assert
+            $expectation = @{
+                BeExactly = $true
+                ExpectedValue = (Join-Path "parent" "child")
+                Because = "[string] argument is implicitly converted to an array"
+            }
+            Join-Paths "parent" "child" | Should @expectation
+        }
+
+        It "joins -Path and each value from an array for -ChildPaths" {
+            # Act + Assert
+            $expectation = @{
+                BeExactly = $true
+                ExpectedValue = (Join-Path "parent" (Join-Path "child" "additional child"))
+                Because = "[string[]] argument is used as is"
+            }
+            Join-Paths "parent" -ChildPath @("child", "additional child") | Should @expectation
+        }
     }
 
-    It "does not accept '' for -Path" {
-        # Act/assert
-        { Join-Paths ([string]::Empty) } | Should -Throw
-    }
+    Context "when given remaining arguments" {
+        It "joins -Path and a single remaining [string] argument" {
+            # Act + Assert
+            $expectation = @{
+                BeExactly = $true
+                ExpectedValue = (Join-Path "parent" "child")
+                Because = "single remaining [string] argument is added to the array"
+            }
+            Join-Paths "parent" "child" | Should @expectation
+        }
 
-    It "does not require an argument for -ChildPaths" {
-        # Act/assert
-        Join-Paths "test" | Should -BeExact "test"
-    }
+        It "joins -Path and a single remaining [string[]] argument" {
+            # Act + Assert
+            $expectation = @{
+                BeExactly = $true
+                ExpectedValue = (Join-Path "parent" "child additional child")
+                Because = "single remaning array argument is implicitly converted to [string] (through  concatenation) added to the array"
+            }
+            Join-Paths "parent" @("child", "additional child") | Should @expectation
+        }
 
-    It "accepts null for -ChildPaths" {
-        # Act/assert
-        Join-Paths "test" $null | Should -BeExact (Join-Path "test" $null)
-    }
-
-    It "accepts '' for -ChildPaths" {
-        # Act/assert
-        Join-Paths "test" [string]::Empty | Should -BeExact (Join-Path "test" [string]::Empty)
-    }
-
-    It "joins -Path and -ChildPaths" {
-        # Act/assert
-        Join-Paths "parent" "child" | Should -BeExact (Join-Path "parent" "child")
-    }
-
-    It "joins -Path and each value from an array for -ChildPaths" {
-        # Arrange
-        $expected = Join-Path "parent" (Join-Path "child" "additional child")
-
-        # Act/assert
-        Join-Paths "parent" -ChildPath @("child","additional child") | Should -BeExact $expected
-    }
-
-    It "joins -Path and a single remaining argument" {
-        # Arrange
-        $expected = Join-Path "parent" "child additional child"
-
-        # Act/assert
-        Join-Paths "parent" @("child","additional child") | Should -BeExact $expected
-    }
-
-    It "joins -Path and all remaining arguments" {
-        # Arrange
-        $expected = Join-Path "parent" (Join-Path "child" "additional child")
-
-        # Act/assert
-        Join-Paths "parent" "child" "additional child" | Should -BeExact $expected
+        It "joins -Path and all remaining arguments" {
+            # Act + Assert
+            $expectation = @{
+                BeExactly = $true
+                ExpectedValue = (Join-Path "parent" (Join-Path "child" "additional child"))
+                Because = "each remaining [string] argument is added to the array"
+            }
+            Join-Paths "parent" "child" "additional child" | Should @expectation
+        }
     }
 }

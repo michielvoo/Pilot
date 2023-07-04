@@ -1,23 +1,18 @@
 function Join-Paths
 {
     [CmdletBinding()]
-    [OutputType([string])]
     param (
         [Alias("PSPath")]
         [Parameter(Mandatory, Position = 0)]
-        [ValidateNotNullOrEmpty()]
-        [string]
-        $Path,
+        [string] $Path,
 
-        [Parameter(Position = 1, ValueFromRemainingArguments)]
-        [string[]]
-        $ChildPaths
+        [Parameter(Mandatory, ValueFromRemainingArguments)]
+        [string[]] $ChildPath
     )
 
-    $result = $Path 
-    foreach ($childPath in $ChildPaths)
-    {
-        $result = Join-Path $result $childPath
+    $result = $Path
+    foreach ($value in $ChildPath) {
+        $result = Join-Path $result $value
     }
 
     $result
