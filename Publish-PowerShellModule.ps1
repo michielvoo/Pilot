@@ -76,7 +76,7 @@ Function Publish-PowerShellModule
             $errors += "$($testResult.FailedCount) test(s) failed"
             $testResult.Tests | Where-Object Result -eq "Failed" | ForEach-Object `
             {
-                $errors += $_.Result + ": " + $_.Name
+                $errors += $_.Result + ": " + $_.ExpandedPath
             }
         }
     }
