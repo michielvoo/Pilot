@@ -5,27 +5,31 @@ function Get-CanonicalPath
     param (
         [Alias("PSPath")]
         [Parameter(Mandatory)]
-        [string]
-        $LiteralPath
+        [string] $Path
     )
 
-    $pathIntrinsics = $ExecutionContext.SessionState.Path
-    $drive = $null
-    $provider = $null
-    $path = $pathIntrinsics.GetUnresolvedProviderPathFromPSPath($LiteralPath, [ref]$provider, [ref]$drive)
+    $providerPath = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($Path)
 
     $segments = @()
     while ($true)
     {
-        $leaf = Split-Path $path -Leaf
-        $parent = Split-Path $path -Parent
+        $leaf = Split-Path $providerPath -Leaf
+        $parent = Split-Path $providerPath -Parent
 
         if ($parent -eq [string]::Empty) {
-            $segments += "$(Split-Path $path -Qualifier)"
+            if (Test-Path $providerPath)
+            {
+                $root = (Get-Item $providerPath).PSDrive.Root.TrimEnd([System.IO.Path]::DirectorySeparatorChar)
+                if ($root)
+                {
+                    $segments += $root
+                }
+            }
+            
             break
         }
 
-        if (Test-Path $path)
+        if (Test-Path $providerPath)
         {
             $segments += (Get-ChildItem $parent -Filter $leaf -Force).Name
         }
@@ -34,7 +38,7 @@ function Get-CanonicalPath
             $segments += "$leaf"
         }
 
-        $path = $parent
+        $providerPath = $parent
     }
 
     [array]::Reverse($segments)
