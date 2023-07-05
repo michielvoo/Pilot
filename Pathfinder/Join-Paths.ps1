@@ -1,6 +1,7 @@
 function Join-Paths
 {
     [CmdletBinding()]
+    [OutputType([string])]
     param (
         [Alias("PSPath")]
         [Parameter(Mandatory, Position = 0)]
