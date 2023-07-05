@@ -372,5 +372,24 @@ Describe "Parameter" {
             # Assert
             $result | Should -Be @(1, 2, "a", "b")
         }
+
+        It "can provide remaining arguments" {
+            # Arrange
+            function Get-Parameter {
+                param (
+                    [Parameter(ValueFromRemainingArguments)]
+                    [string[]] $Parameter
+                )
+
+                $Parameter
+            }
+
+            # Act
+            $parameters = @("a", "b", "c")
+            $result = Get-Parameter @parameters
+
+            # Assert
+            $result | Should -Be @("a", "b", "c")
+        }
     }
 }
