@@ -44,7 +44,7 @@ Describe "Get-Location" {
             $providerPath = $location.ProviderPath
 
             # Assert
-            $providerPath | Should -BeLikeExactly "$($tempPath)*"
+            $providerPath | Should -BeLikeExactly "$tempPath*"
         }
     }
 }
