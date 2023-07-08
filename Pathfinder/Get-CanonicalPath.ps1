@@ -55,6 +55,8 @@ function Get-CanonicalPath {
             # When the file system is case-insensitive, the item will be found even if the case does not match
             $item = Get-ChildItem $canonicalPath -Filter $segment -Force
 
+            Write-Information "Canonical path: $canonicalPath, segment: $segment, item: $($item.Name)"
+
             # Replace the segment with the case-correct name
             $segment = $item.Name
         }
