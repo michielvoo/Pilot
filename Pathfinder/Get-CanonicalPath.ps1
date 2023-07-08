@@ -13,31 +13,39 @@ function Get-CanonicalPath
     $segments = @()
     while ($true)
     {
-        $leaf = Split-Path $providerPath -Leaf
-        $parent = Split-Path $providerPath -Parent
-
-        if ($parent -eq [string]::Empty) {
-            if (Test-Path $providerPath)
-            {
-                $root = (Get-Item $providerPath).PSDrive.Root.TrimEnd([System.IO.Path]::DirectorySeparatorChar)
-                if ($root)
-                {
-                    $segments += $root
-                }
-            }
-            
-            break
-        }
-
         if (Test-Path $providerPath)
         {
-            $segments += (Get-ChildItem $parent -Filter $leaf -Force).Name
+            $leaf = Split-Path $providerPath -Leaf
+            $parent = Split-Path $providerPath -Parent
+            if ($parent -eq [string]::Empty) {
+                $node = (Get-ChildItem "/" -Filter $leaf -Force).Name
+            }
+            else {
+                $node = (Get-ChildItem $parent -Filter $leaf -Force).Name
+            }
+
+            $segments += "$node"
         }
         else
         {
-            $segments += "$leaf"
+            $leaf = Split-Path $providerPath -Leaf
+            $segments += $leaf
         }
 
+        $parent = Split-Path $providerPath -Parent
+
+        if ($parent -eq [string]::Empty) {
+            $qualifier = Split-Path $providerPath -Qualifier -ErrorAction SilentlyContinue
+            if ($qualifier) {
+                $segments += $qualifier
+            }
+            else {
+                $segments += [string]::Empty
+            }
+
+            break
+        }
+        
         $providerPath = $parent
     }
 
