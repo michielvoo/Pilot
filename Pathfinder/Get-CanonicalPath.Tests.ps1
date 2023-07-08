@@ -88,17 +88,32 @@ Describe Get-CanonicalPath {
         #     $canonicalPath | Should -BeExactly (Join-Path $tempPath $randomFileName)
         # }
 
-        It "returns path that is canonical up to but excluding the non-existent file or directory" {
+        It "returns path whith fixed segments" {
             # Arrange
+            $upperCase = "TEST.txt"
+            $lowerCase = "test.txt"
+            $mixedCase = "TEST.txt"
+
             $tempPath = [System.IO.Path]::GetTempPath()
-            $randomFileName = [System.IO.Path]::GetRandomFileName()
-            $nonCanonicalPath = (Join-Path $tempPath $randomFileName).ToUpper()
+            $randomDirectoryPath = Join-Path $tempPath ([System.IO.Path]::GetRandomFileName())
+            New-Item $randomDirectoryPath -ItemType Directory | Out-Null
+            New-Item (Join-Path $randomDirectoryPath $uppercase) -ItemType File | Out-Null
+            if (Test-Path (Join-Path $randomDirectoryPath $lowerCase)) {
+                # File system is case-insensitive, segments can be fixed
+                $expectedFileName = $upperCase
+            }
+            else {
+                New-Item (Join-Path $randomDirectoryPath $lowerCase) -ItemType File | Out-Null
+                # File system is case-sensitive, segments cannot be fixed
+                $expectedFileName = $mixedCase
+            }
+            $nonCanonicalPath = Join-Path $randomDirectoryPath $mixedCase
 
             # Act
             $canonicalPath = Get-CanonicalPath $nonCanonicalPath
 
             # Assert
-            $canonicalPath | Should -BeExactly (Join-Path $tempPath $randomFileName.ToUpper())
+            $canonicalPath | Should -BeExactly (Join-Path $randomDirectoryPath $expectedFileName)
         }
 
         # It "returns an absolute path" {
