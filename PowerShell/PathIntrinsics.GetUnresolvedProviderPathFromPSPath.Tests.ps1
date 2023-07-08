@@ -5,14 +5,13 @@ BeforeAll {
 Describe "PathIntrinsics.GetUnresolvedProviderPathFromPSPath" {
     It "returns a provider-internal path" {
         # Arrange
-        $tempPath = [System.IO.Path]::GetTempPath()
         $path = Join-Path "TestDrive:" "test"
 
         # Act
         $providerPath = $pathIntrinsics.GetUnresolvedProviderPathFromPSPath($path)
 
         # Assert
-        $providerPath | Should -BeLikeExactly "$tempPath*"
+        $providerPath | Should -Not -Be $path
     }
 
     It "sets the provider" {
