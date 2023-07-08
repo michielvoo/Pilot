@@ -77,7 +77,12 @@ Function Publish-PowerShellModule
             $errors += "$($testResult.FailedCount) test(s) failed"
             $testResult.Tests | Where-Object Result -eq "Failed" | ForEach-Object `
             {
-                $errors += $_.Result + ": " + $_.ExpandedPath + ": " + $_.ErrorRecord
+                $e = "$($_.Result): $($_.ExpandedPath)"
+                foreach ($errorRecord in $_.ErrorRecord) {
+                    $e = "${e}: $errorRecord"
+                    break
+                }
+                $errors += $e
             }
         }
     }
@@ -178,10 +183,9 @@ Function Publish-PowerShellModule
             {
                 Write-Information "##vso[task.logIssue type=error]$_"
             }
-
             Else
             {
-                Write-Error $_
+                $Host.UI.WriteErrorLine($_)
             }
         }
         $errors.Clear()
