@@ -4,6 +4,19 @@ BeforeAll {
 }
 
 Describe Get-CanonicalPath {
+    It "only supports file system providers" {
+        # Arrange
+        $envPath = "Env:test"
+
+        # Act + Assert
+        $expectation = @{
+            Throw = $true
+            ErrorId = "PSProviderNotSupported,Get-CanonicalPath"
+            ExceptionType = [System.NotSupportedException]
+        }
+        { Get-CanonicalPath $envPath -ErrorAction "Stop" } | Should @expectation
+    }
+
     Context "for paths rooted in the file system's temp path" {
         It "removes . segment from the path" {
             # Arrange
@@ -115,6 +128,21 @@ Describe Get-CanonicalPath {
             # Assert
             $providerPath = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($nonCanonicalPath)
             $canonicalPath | Should -BeExactly $providerPath
+        }
+    }
+
+    Context "on Windows PowerShell" {
+        if ($PSEdition -eq "Desktop") {
+            It "returns the root of the file system drive" {
+                # Arrange
+                $drive = Get-PSDrive -PSProvider "FileSystem" | Where-Object { $_.Name -ne "TestDrive" } | Select-Object -First 1
+
+                # Act
+                $canonicalPath = Get-CanonicalPath $drive.Root
+
+                # Assert
+                $canonicalPath | Should -BeExactly $drive.Root
+            }
         }
     }
 }
