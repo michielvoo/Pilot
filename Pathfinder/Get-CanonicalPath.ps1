@@ -35,7 +35,7 @@ function Get-CanonicalPath {
 
     # Split the root-relative provider path on directory separators
     $separator = [System.IO.Path]::DirectorySeparatorChar
-    $segments = $rootRelativeProviderPath.Split($separator) | Where-Object { $_ -ne ([string]::Empty) }
+    $segments = $rootRelativeProviderPath.Split($separator)
 
     # Start with the drive root ("C:\" or "D:\" etc., or "/")
     $canonicalPath = $drive.Root
@@ -43,6 +43,11 @@ function Get-CanonicalPath {
     # Loop over the segments of the root-relative provider path
     for ($i = 0; $i -lt $segments.Length; $i++) {
         $segment = $segments[$i]
+
+        # First segment can be empty if the drive root is "/"
+        if ($segment -eq ([string]::Empty)) {
+            continue
+        }
 
         # Check if a file with the name of the segment exists in the currently built canonical path
         $exists = Test-Path (Join-Path $canonicalPath $segment)
