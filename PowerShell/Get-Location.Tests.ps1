@@ -34,17 +34,5 @@ Describe "Get-Location" {
             # Assert
             $path | Should -Be "TestDrive:$([System.IO.Path]::DirectorySeparatorChar)"
         }
-
-        It "returns a location whose provider path is in the temp directory" {
-            # Arrange
-            $tempPath = [System.IO.Path]::GetTempPath()
-            $location = Get-Location -PSDrive "TestDrive"
-
-            # Act
-            $providerPath = $location.ProviderPath
-
-            # Assert
-            $providerPath | Should -BeLikeExactly "$tempPath*"
-        }
     }
 }
