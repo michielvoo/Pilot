@@ -24,22 +24,24 @@ Describe "Write-Debug" {
         $debugRecord.Message | Should -BeExact "test"
     }
 
-    It "-Debug sets `$DebugPreference to Inquire" {
-        # Arrange
-        function Get-DebugPreference
-        {
-            [CmdletBinding()]
-            param ()
+    if ($PSEdition -eq "Desktop") {
+        It "-Debug sets `$DebugPreference to Inquire" {
+            # Arrange
+            function Get-DebugPreference
+            {
+                [CmdletBinding()]
+                param ()
 
-            $DebugPreference
+                $DebugPreference
+            }
+            $overriddenDebugPreference | Should -Not -Be "Inquire"
+
+            # Act
+            $overriddenDebugPreference = Get-DebugPreference -Debug
+
+            # Assert
+            $overriddenDebugPreference | Should -BeExact "Inquire"
         }
-        $overriddenDebugPreference | Should -Not -Be "Inquire"
-
-        # Act
-        $overriddenDebugPreference = Get-DebugPreference -Debug
-
-        # Assert
-        $overriddenDebugPreference | Should -BeExact "Inquire"
     }
 }
 
