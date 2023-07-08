@@ -1,5 +1,5 @@
 Describe "Write-Debug" {
-    It "writes a DebugRecord to the debug stream (5) when -Debug is specified" {
+    It "writes a DebugRecord to the debug stream (5)" {
         # Arrange
         function Write-StringToDebug
         {
@@ -9,11 +9,37 @@ Describe "Write-Debug" {
             Write-Debug -Message "test"
         }
 
+        $previousDebugPreference = $DebugPreference
+        $DebugPreference = "Continue"
+
         # Act
-        $debugRecord = Write-StringToDebug -Debug 5>&1
+        try {
+            $debugRecord = Write-StringToDebug 5>&1
+        }
+        finally {
+            $DebugPreference = $previousDebugPreference
+        }
 
         # Assert
         $debugRecord.Message | Should -BeExact "test"
+    }
+
+    It "-Debug sets `$DebugPreference to Inquire" {
+        # Arrange
+        function Get-DebugPreference
+        {
+            [CmdletBinding()]
+            param ()
+
+            $DebugPreference
+        }
+        $overriddenDebugPreference | Should -Not -Be "Inquire"
+
+        # Act
+        $overriddenDebugPreference = Get-DebugPreference -Debug
+
+        # Assert
+        $overriddenDebugPreference | Should -BeExact "Inquire"
     }
 }
 
