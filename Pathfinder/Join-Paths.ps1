@@ -2,6 +2,7 @@ function Join-Paths
 {
     [CmdletBinding()]
     [OutputType([string])]
+    [System.Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSUseSingularNouns", "", Justification="Use plural to avoid duplicate name")]
     param (
         [Alias("PSPath")]
         [Parameter(Mandatory, Position = 0)]

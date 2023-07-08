@@ -102,6 +102,7 @@ Function Publish-PowerShellModule
                 $errors += $_.ScriptPath + `
                     ":$($_.Extent.StartLineNumber)" + `
                     ":$($_.Extent.StartColumnNumber)" + `
+                    ": " + $_.RuleName + `
                     ": " + $_.Message
             }
         }
