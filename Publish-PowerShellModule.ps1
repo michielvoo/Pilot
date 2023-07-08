@@ -71,12 +71,13 @@ Function Publish-PowerShellModule
                 TestSuiteName = $Name
             }
         }
+
         If ($LastExitCode)
         {
             $errors += "$($testResult.FailedCount) test(s) failed"
             $testResult.Tests | Where-Object Result -eq "Failed" | ForEach-Object `
             {
-                $errors += $_.Result + ": " + $_.ExpandedPath
+                $errors += $_.Result + ": " + $_.ExpandedPath + ": " + $_.ErrorRecord
             }
         }
     }
