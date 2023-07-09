@@ -27,14 +27,14 @@
             }
         },
         {
-            "label": "Install",
-            "detail": "Install from repository named Pilot",
+            "label": "Run",
+            "detail": "Install Pilot from the local staging repository, and run Publish-PowerShellModule",
             "type": "process",
             "command": "pwsh",
             "windows": {
                 "command": "powershell.exe"
             },
-            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Install"],
+            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Run"],
             "group": "test"
         }
     ]

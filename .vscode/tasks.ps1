@@ -13,24 +13,26 @@ switch ($Task) {
         Invoke-Pester ${workspaceFolder}
     }
 
-    "Install" {
+    "Run" {
         $InformationPreference = "Continue"
 
         $installedModule = Get-InstalledModule Pilot -ErrorAction SilentlyContinue
         if ($installedModule) {
             Uninstall-Module Pilot -ErrorAction Stop
-            Write-Information "Uninstalled module"
+            Write-Information "$($installedModule.Version): uninstalled"
         }
 
         $repository = Get-PSRepository Pilot -ErrorAction SilentlyContinue
         if ($repository) {
             $module = Find-Module Pilot -Repository Pilot -AllowPrerelease -ErrorAction SilentlyContinue
-            Write-Information "Found module"
+            Write-Information "$($module.Version): found"
             if ($module) {
                 Install-Module Pilot -Repository Pilot -AllowPrerelease -ErrorAction Stop
-                Write-Information "Installed module"
+                Write-Information "$($module.Version): installed"
                 Import-Module Pilot -ErrorAction Stop
-                Write-Information "Imported module"
+                Write-Information "$($module.Version): successfully imported"
+                Publish-PowerShellModule
+                Write-Information "Invoked Publish-PowerShellModule"
             }
         }
     }
