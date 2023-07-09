@@ -197,7 +197,6 @@ Function Publish-PowerShellModule
     }
 
     # Build package
-    . (Join-Path "." (Join-Path "Pathfinder" "Get-CanonicalPath.ps1"))
     $repositories = @(Get-PSRepository | Where-Object {
         $location = $_.SourceLocation
         if ([uri]::IsWellFormedUriString($location, [System.UriKind]::Absolute))

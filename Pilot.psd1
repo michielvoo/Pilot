@@ -7,6 +7,7 @@
     Description = "Pilot builds, verifies, and publishes prerelease and release versions of PowerShell modules based on version control events (branch & commit, merge, and tag), and ensures that module metadata is complete, consistent, and correct."
     FileList = @(
         "Pathfinder/Get-CanonicalPath.ps1"
+        "Pathfinder/Pathfinder.psm1"
         "License.txt"
         "Pilot.psd1"
         "Pilot.psm1"
@@ -17,7 +18,10 @@
         "Publish-PowerShellModule"
     )
     GUID = "ffc50278-3ae6-4f6d-88b5-9aec7043bc27"
-    ModuleVersion = "0.0.3"
+    ModuleVersion = "0.0.4"
+    NestedModules = @(
+        "Pathfinder/Pathfinder.psm1"
+    )
     PowerShellVersion = "5.1"
     PrivateData = @{
         PSData = @{

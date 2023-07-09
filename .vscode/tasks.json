@@ -3,45 +3,39 @@
     "tasks": [
         {
             "label": "Build",
-            "type": "shell",
-            "options": {
-                "shell": {
-                    "executable": "pwsh"
-                }
-            },
+            "detail": "Publish the PowerShell module to the local staging repository",
+            "type": "process",
+            "command": "pwsh",
             "windows": {
-                "options": {
-                    "shell": {
-                        "executable": "powershell.exe"
-                    }
-                }
+                "command": "powershell.exe"
             },
-            "command": ". (Join-Path \"${workspaceFolder}\" Publish-PowerShellModule.ps1); Publish-PowerShellModule",
-            "group": {
-                "kind": "build",
-                "isDefault": true
-            }
+            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Build"],
+            "group": "build"
         },
         {
             "label": "Test",
-            "type": "shell",
-            "options": {
-                "shell": {
-                    "executable": "pwsh"
-                }
-            },
+            "detail": "Run all Pester tests",
+            "type": "process",
+            "command": "pwsh",
             "windows": {
-                "options": {
-                    "shell": {
-                        "executable": "powershell.exe"
-                    }
-                }
+                "command": "powershell.exe"
             },
-            "command": "Invoke-Pester ${workspaceFolder}",
+            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Test"],
             "group": {
                 "kind": "test",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Run",
+            "detail": "Install Pilot from the local staging repository, and run Publish-PowerShellModule",
+            "type": "process",
+            "command": "pwsh",
+            "windows": {
+                "command": "powershell.exe"
+            },
+            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Run"],
+            "group": "test"
         }
     ]
 }
