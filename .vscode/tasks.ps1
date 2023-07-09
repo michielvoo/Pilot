@@ -5,7 +5,7 @@ param (
 
 switch ($Task) {
     "Build" {
-        Import-Module ./Pilot.psd1
+        Import-Module ./Pilot.psd1 -ErrorAction Stop
         Publish-PowerShellModule
     }
 
