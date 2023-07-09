@@ -1,6 +1,5 @@
 {
     "version": "2.0.0",
-    "x": "foo",
     "tasks": [
         {
             "label": "Build",
