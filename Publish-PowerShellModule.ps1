@@ -209,17 +209,19 @@ Function Publish-PowerShellModule
 
     if ($repositories.Length -eq 0) {
         $unregisterRepository = $true
-        $repository = Register-PSRepository -Name $Name `
+        Register-PSRepository -Name $Name `
             -SourceLocation $ArtifactsPath `
-            -PublishLocation $ArtifactsPath
+            -PublishLocation $ArtifactsPath `
+            -ErrorAction Stop
+        $repositoryName = $Name
     }
     else {
-        $repository = $repositories[0]
+        $repositoryName = $repositories[0].Name
     }
 
     Publish-Module `
         -Path (Split-Path -Path $manifestPath -Parent) `
-        -Repository $repository.Name
+        -Repository $repositoryName
 
     $ignore = $Error |
         Where-Object { $_.CategoryInfo.Activity -eq "Find-Package" } |
@@ -227,7 +229,7 @@ Function Publish-PowerShellModule
     $ignore | ForEach-Object { $Error.Remove($_) }
 
     if ($unregisterRepository) {
-        Unregister-PSRepository $repository.Name
+        Unregister-PSRepository $repositoryName
     }
 
     # Push package
