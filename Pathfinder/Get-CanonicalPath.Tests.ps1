@@ -141,7 +141,7 @@ Describe Get-CanonicalPath {
             $canonicalPath = Get-CanonicalPath $nonCanonicalPath
 
             # Assert
-            $providerPath = $PSCmdlet.GetUnresolvedProviderPathFromPSPath($nonCanonicalPath)
+            $providerPath = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($nonCanonicalPath)
             $canonicalPath | Should -BeExactly $providerPath
         }
     }

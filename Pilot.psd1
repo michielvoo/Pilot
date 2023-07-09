@@ -17,7 +17,7 @@
         "Publish-PowerShellModule"
     )
     GUID = "ffc50278-3ae6-4f6d-88b5-9aec7043bc27"
-    ModuleVersion = "0.0.3"
+    ModuleVersion = "0.0.4"
     PowerShellVersion = "5.1"
     PrivateData = @{
         PSData = @{
