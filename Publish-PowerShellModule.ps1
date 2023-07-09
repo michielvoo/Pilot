@@ -71,12 +71,18 @@ Function Publish-PowerShellModule
                 TestSuiteName = $Name
             }
         }
+
         If ($LastExitCode)
         {
             $errors += "$($testResult.FailedCount) test(s) failed"
             $testResult.Tests | Where-Object Result -eq "Failed" | ForEach-Object `
             {
-                $errors += $_.Result + ": " + $_.Name
+                $e = "$($_.Result): $($_.ExpandedPath)"
+                foreach ($errorRecord in $_.ErrorRecord) {
+                    $e = "${e}: $errorRecord"
+                    break
+                }
+                $errors += $e
             }
         }
     }
@@ -96,6 +102,7 @@ Function Publish-PowerShellModule
                 $errors += $_.ScriptPath + `
                     ":$($_.Extent.StartLineNumber)" + `
                     ":$($_.Extent.StartColumnNumber)" + `
+                    ": " + $_.RuleName + `
                     ": " + $_.Message
             }
         }
@@ -112,7 +119,9 @@ Function Publish-PowerShellModule
     ForEach ($path in $manifest.FileList)
     {
         $relativePath = Resolve-Path -Path $path -Relative
-        Copy-Item -Path $path -Destination (Join-Path -Path $tempModulePath -ChildPath $relativePath)
+        $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
+        New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
+        Copy-Item -Path $path -Destination $absolutePath
     }
 
     # Adjust manifest path
@@ -177,10 +186,9 @@ Function Publish-PowerShellModule
             {
                 Write-Information "##vso[task.logIssue type=error]$_"
             }
-
             Else
             {
-                Write-Error $_
+                $Host.UI.WriteErrorLine($_)
             }
         }
         $errors.Clear()
@@ -189,20 +197,40 @@ Function Publish-PowerShellModule
     }
 
     # Build package
-    Register-PackageSource Artifacts $ArtifactsPath `
-        -ProviderName PowerShellGet `
-        -PublishLocation $ArtifactsPath > $null
+    . (Join-Path "." (Join-Path "Pathfinder" "Get-CanonicalPath.ps1"))
+    $repositories = @(Get-PSRepository | Where-Object {
+        $location = $_.SourceLocation
+        if ([uri]::IsWellFormedUriString($location, [System.UriKind]::Absolute))
+        {
+            return $false
+        }
+        return (Get-CanonicalPath $location) -eq (Get-CanonicalPath $ArtifactsPath)
+    })
+
+    if ($repositories.Length -eq 0) {
+        $unregisterRepository = $true
+        Register-PSRepository -Name $Name `
+            -SourceLocation $ArtifactsPath `
+            -PublishLocation $ArtifactsPath `
+            -ErrorAction Stop
+        $repositoryName = $Name
+    }
+    else {
+        $repositoryName = $repositories[0].Name
+    }
 
     Publish-Module `
         -Path (Split-Path -Path $manifestPath -Parent) `
-        -Repository Artifacts
+        -Repository $repositoryName
 
     $ignore = $Error |
         Where-Object { $_.CategoryInfo.Activity -eq "Find-Package" } |
         Where-Object { $_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound }
     $ignore | ForEach-Object { $Error.Remove($_) }
 
-    Unregister-PackageSource Artifacts
+    if ($unregisterRepository) {
+        Unregister-PSRepository $repositoryName
+    }
 
     # Push package
     If ($NuGetUrl -and $NuGetApiKey)
