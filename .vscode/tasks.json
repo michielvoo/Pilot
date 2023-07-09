@@ -21,6 +21,20 @@
                 "command": "powershell.exe"
             },
             "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Test"],
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "Install",
+            "detail": "Install from repository named Pilot",
+            "type": "process",
+            "command": "pwsh",
+            "windows": {
+                "command": "powershell.exe"
+            },
+            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Install"],
             "group": "test"
         }
     ]
