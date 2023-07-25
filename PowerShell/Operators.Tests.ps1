@@ -75,6 +75,34 @@ Describe "Operator" {
                     $output[1].FullyQualifiedErrorId | Should -BeExact "NativeCommandErrorMessage"
                     $output[2].FullyQualifiedErrorId | Should -BeExact "NativeCommandErrorMessage"
                 }
+
+                It "sets category info target name to the stderr line" {
+                    # Act
+                    $output = & find test 2>&1
+
+                    # Assert
+                    $output[0].CategoryInfo.TargetName | Should -Match "find:"
+                    $output[0].CategoryInfo.TargetType | Should -BeExact "String"
+                }
+
+                It "sets category info properties" {
+                    # Act
+                    $output = & find test 2>&1
+
+                    # Assert
+                    $output[0].CategoryInfo.Activity | Should -BeExact ([string]::Empty)
+                    $output[0].CategoryInfo.Category | Should -BeExact "NotSpecified"
+                    $output[0].CategoryInfo.Reason | Should -BeExact "RemoteException"
+                    $output[0].CategoryInfo.TargetName | Should -Match "find:"
+                }
+
+                It "sets error details to `$null" {
+                    # Act
+                    $output = & find test 2>&1
+
+                    # Assert
+                    $output[0].ErrorDetails.Message | Should -BeNull
+                }
             }
         }
     }
