@@ -100,6 +100,7 @@ Describe "Write-Warning" {
 
         # Assert
         $warningRecord.Message | Should -BeExact "test"
+        $warningRecord.FullyQualifiedWarningId | Should -BeExact ([string]::Empty)
     }
 }
 
