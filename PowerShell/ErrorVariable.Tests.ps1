@@ -1,5 +1,5 @@
 Describe "-ErrorVariable" {
-    It "collects single error in a [System.Collections.ArrayList]" {
+    It "collects a single error in a [System.Collections.ArrayList]" {
         # Arrange
         function Test {
             [CmdletBinding()]
