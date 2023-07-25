@@ -119,6 +119,7 @@ Describe "Write-Error" {
 
         # Assert
         $errorRecord.CategoryInfo.Category | Should -Be NotSpecified
+        $errorRecord.CategoryInfo.Reason | Should -BeExact "WriteErrorException"
         $errorRecord.Exception | Should -BeOfType [Microsoft.PowerShell.Commands.WriteErrorException]
         $errorRecord.Exception.Message | Should -BeExact "test"
         $errorRecord.FullyQualifiedErrorId | Should -Be "Microsoft.PowerShell.Commands.WriteErrorException,Write-StringToError"
