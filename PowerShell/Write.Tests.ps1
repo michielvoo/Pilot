@@ -118,7 +118,10 @@ Describe "Write-Error" {
         $errorRecord = Write-StringToError -ErrorAction "Continue" 2>&1
 
         # Assert
+        $errorRecord.CategoryInfo.Category | Should -Be NotSpecified
+        $errorRecord.Exception | Should -BeOfType [Microsoft.PowerShell.Commands.WriteErrorException]
         $errorRecord.Exception.Message | Should -BeExact "test"
+        $errorRecord.FullyQualifiedErrorId | Should -Be "Microsoft.PowerShell.Commands.WriteErrorException,Write-StringToError"
     }
 
     It "throws an error when -ErrorAction is Stop" {
