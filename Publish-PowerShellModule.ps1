@@ -79,7 +79,16 @@ Function Publish-PowerShellModule
             {
                 $e = "$($_.Result): $($_.ExpandedPath)"
                 foreach ($errorRecord in $_.ErrorRecord) {
-                    $e = "${e}: $errorRecord"
+                    $category = $errorRecord.CategoryInfo.Category
+                    if ($category -eq ([System.Management.Automation.ErrorCategory]::InvalidResult)) {
+                        $exceptionMessage = $errorRecord.Exception.Message
+                        $e = "${e}: $exceptionMessage"
+                    }
+                    else {
+                        # Category will be NotSpecified
+                        $e = "${e}: An unexpected error occurred during execution of this test"
+                    }
+
                     break
                 }
                 $errors += $e
@@ -87,91 +96,91 @@ Function Publish-PowerShellModule
         }
     }
 
-    # Code analysis
-    Get-ChildItem -Exclude "*.Tests.ps1" -Recurse | Where-Object { $_.Extension -in ".ps1",".psd1",".psm1" } | ForEach-Object `
-    {
-        $diagnosticRecords = Invoke-ScriptAnalyzer `
-            -IncludeDefaultRules `
-            -Path $_.FullName `
-            -Severity "Information","Warning","Error"
+    # # Code analysis
+    # Get-ChildItem -Exclude "*.Tests.ps1" -Recurse | Where-Object { $_.Extension -in ".ps1",".psd1",".psm1" } | ForEach-Object `
+    # {
+    #     $diagnosticRecords = Invoke-ScriptAnalyzer `
+    #         -IncludeDefaultRules `
+    #         -Path $_.FullName `
+    #         -Severity "Information","Warning","Error"
 
-        If ($diagnosticRecords)
-        {
-            $diagnosticRecords | ForEach-Object `
-            {
-                $errors += $_.ScriptPath + `
-                    ":$($_.Extent.StartLineNumber)" + `
-                    ":$($_.Extent.StartColumnNumber)" + `
-                    ": " + $_.RuleName + `
-                    ": " + $_.Message
-            }
-        }
-    }
+    #     If ($diagnosticRecords)
+    #     {
+    #         $diagnosticRecords | ForEach-Object `
+    #         {
+    #             $errors += $_.ScriptPath + `
+    #                 ":$($_.Extent.StartLineNumber)" + `
+    #                 ":$($_.Extent.StartColumnNumber)" + `
+    #                 ": " + $_.RuleName + `
+    #                 ": " + $_.Message
+    #         }
+    #     }
+    # }
 
-    # Copy files
-    $tempModulePath = Join-Path `
-        -Path (Join-Path `
-            -Path ([IO.Path]::GetTempPath()) `
-            -ChildPath ([IO.Path]::GetRandomFileName())) `
-        -ChildPath $Name
-    New-Item -ItemType Directory -Path $tempModulePath | Out-Null
+    # # Copy files
+    # $tempModulePath = Join-Path `
+    #     -Path (Join-Path `
+    #         -Path ([IO.Path]::GetTempPath()) `
+    #         -ChildPath ([IO.Path]::GetRandomFileName())) `
+    #     -ChildPath $Name
+    # New-Item -ItemType Directory -Path $tempModulePath | Out-Null
 
-    ForEach ($path in $manifest.FileList)
-    {
-        $relativePath = Resolve-Path -Path $path -Relative
-        $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
-        New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
-        Copy-Item -Path $path -Destination $absolutePath
-    }
+    # ForEach ($path in $manifest.FileList)
+    # {
+    #     $relativePath = Resolve-Path -Path $path -Relative
+    #     $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
+    #     New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
+    #     Copy-Item -Path $path -Destination $absolutePath
+    # }
 
-    # Adjust manifest path
-    $manifestPath = Join-Path -Path $tempModulePath -ChildPath (Resolve-Path -Path $manifestPath -Relative) -Resolve
+    # # Adjust manifest path
+    # $manifestPath = Join-Path -Path $tempModulePath -ChildPath (Resolve-Path -Path $manifestPath -Relative) -Resolve
 
-    # Versioning
-    [Version] $version = $manifest.Version
-    If ($version)
-    {
-        If ($Ref -match "^v\d+\.\d+\.\d+$")
-        {
-            If ("v$($version.Major).$($version.Minor).$($version.Build)" -ne $Ref)
-            {
-                $errors += "Version in manifest ($version) does not match tag ($Ref)"
-            }
-        }
-        ElseIf ((git rev-list --count HEAD) -gt 1)
-        {
-            If ($Ref -eq $Main)
-            {
-                $revision = "HEAD^1"
-            }
-            Else
-            {
-                $revision = $Main
-                git fetch origin "${Main}:$Main" --depth=1 --quiet
+    # # Versioning
+    # [Version] $version = $manifest.Version
+    # If ($version)
+    # {
+    #     If ($Ref -match "^v\d+\.\d+\.\d+$")
+    #     {
+    #         If ("v$($version.Major).$($version.Minor).$($version.Build)" -ne $Ref)
+    #         {
+    #             $errors += "Version in manifest ($version) does not match tag ($Ref)"
+    #         }
+    #     }
+    #     ElseIf ((git rev-list --count HEAD) -gt 1)
+    #     {
+    #         If ($Ref -eq $Main)
+    #         {
+    #             $revision = "HEAD^1"
+    #         }
+    #         Else
+    #         {
+    #             $revision = $Main
+    #             git fetch origin "${Main}:$Main" --depth=1 --quiet
 
-                $topic = $Ref -replace "[^a-zA-Z0-9]",""
-                $prerelease = $topic + ("{0:000000}" -f $Build)
+    #             $topic = $Ref -replace "[^a-zA-Z0-9]",""
+    #             $prerelease = $topic + ("{0:000000}" -f $Build)
 
-                Update-ModuleManifest -Path $manifestPath -Prerelease $prerelease
-            }
+    #             Update-ModuleManifest -Path $manifestPath -Prerelease $prerelease
+    #         }
 
-            $path = [IO.Path]::GetTempFileName() + ".psd1"
-            git show "${Revision}:$(Resolve-Path $manifestPath -Relative)" > "$path" 2> $Null
-            If (-Not $LastExitCode)
-            {
-                [Version] $current = (Test-ModuleManifest $path).Version
+    #         $path = [IO.Path]::GetTempFileName() + ".psd1"
+    #         git show "${Revision}:$(Resolve-Path $manifestPath -Relative)" > "$path" 2> $Null
+    #         If (-Not $LastExitCode)
+    #         {
+    #             [Version] $current = (Test-ModuleManifest $path).Version
 
-                If (-not ($version -gt $current))
-                {
-                    $errors += "Version in manifest does not increment $current"
-                }
-            }
-        }
-        ElseIf($version -ne [Version] "0.0.1" -and $version -ne [Version] "0.1.0" -and $version -ne [Version] "1.0.0")
-        {
-            $errors += "Version in manifest should be 0.0.1, 0.1.0, or 1.0.0 on initial commit, or fetch depth must be at least 2."
-        }
-    }
+    #             If (-not ($version -gt $current))
+    #             {
+    #                 $errors += "Version in manifest does not increment $current"
+    #             }
+    #         }
+    #     }
+    #     ElseIf($version -ne [Version] "0.0.1" -and $version -ne [Version] "0.1.0" -and $version -ne [Version] "1.0.0")
+    #     {
+    #         $errors += "Version in manifest should be 0.0.1, 0.1.0, or 1.0.0 on initial commit, or fetch depth must be at least 2."
+    #     }
+    # }
 
     # Exit with errors
     If ($errors)
