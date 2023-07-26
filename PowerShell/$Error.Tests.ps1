@@ -14,7 +14,7 @@ Describe "`$Error automatic variable" {
         }
 
         # Act
-        Test 2>$null
+        Test -ErrorAction SilentlyContinue
         
         # Assert
         $global:Error -is [System.Collections.ArrayList] | Should -BeTrue -Because "`$Error is an ArrayList"
@@ -35,7 +35,7 @@ Describe "`$Error automatic variable" {
         }
 
         # Act
-        Test 2>$null
+        Test -ErrorAction SilentlyContinue
 
         # Assert
         $global:Error.Count | Should -Be 2
@@ -80,7 +80,7 @@ Describe "`$Error automatic variable" {
         }
 
         # Act
-        Test 2>$null
+        Test -ErrorAction SilentlyContinue
 
         # Assert
         $global:Error.Count | Should -Be 2
