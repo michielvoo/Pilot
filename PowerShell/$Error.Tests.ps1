@@ -1,5 +1,5 @@
-# The error stream is redirected in these tests just to ensure the errors are not visible in the 
-# host when running these tests.
+# The error action is set to silently continue in these tests just to ensure the errors are not 
+# visible in the host when running these tests.
 
 Describe "`$Error automatic variable" {
     It "automatically collects a single error in a [System.Collections.ArrayList]" {
@@ -57,7 +57,7 @@ Describe "`$Error automatic variable" {
 
         # Act
         try {
-            Test -ErrorAction Stop 2>$null
+            Test -ErrorAction Stop
         }
         catch {
         }
@@ -94,6 +94,7 @@ Describe "`$Error automatic variable" {
         # The redirection of the error stream in this test is part of the preconditions for this 
         # test to pass in PowerShell's ConsoleHost. Without that redirection, in PowerShell's 
         # ConsoleHost, stderr output is not visible to PowerShell itself.
+        # Fails in PowerShell 7.2
 
         # Arrange
         $global:Error.Clear()

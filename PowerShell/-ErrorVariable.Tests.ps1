@@ -1,5 +1,5 @@
-# The error stream is redirected in these tests just to ensure the errors are not visible in the 
-# host when running these tests.
+# The error action is set to silently continue in these tests just to ensure the errors are not 
+# visible in the host when running these tests.
 
 Describe "-ErrorVariable" {
     It "collects a single error in a [System.Collections.ArrayList]" {
@@ -12,7 +12,7 @@ Describe "-ErrorVariable" {
         }
 
         # Act
-        Test -ErrorVariable "capturedErrors" 2>$null
+        Test -ErrorVariable "capturedErrors" -ErrorAction SilentlyContinue
 
         # Assert
         $capturedErrors -is [System.Collections.ArrayList] | Should -BeTrue
@@ -31,7 +31,7 @@ Describe "-ErrorVariable" {
         }
 
         # Act
-        Test -ErrorVariable "capturedErrors" 2>$null
+        Test -ErrorVariable "capturedErrors" -ErrorAction SilentlyContinue
 
         # Assert
         $capturedErrors.Count | Should -Be 2
@@ -51,7 +51,7 @@ Describe "-ErrorVariable" {
 
         # Act
         try {
-            Test -ErrorVariable "capturedErrors" -ErrorAction Stop 2>$null
+            Test -ErrorVariable "capturedErrors" -ErrorAction Stop
         }
         catch {
         }
@@ -72,11 +72,11 @@ Describe "-ErrorVariable" {
             [CmdletBinding()]
             param ()
 
-            Write-Error "error" 2>$null
+            Write-Error "error"
         }
 
         # Act
-        Test -ErrorVariable "capturedErrors"
+        Test -ErrorVariable "capturedErrors" -ErrorAction SilentlyContinue
 
         # Assert
         $capturedErrors.Count | Should -Be 1
@@ -97,7 +97,7 @@ Describe "-ErrorVariable" {
         }
 
         # Act
-        Test -ErrorVariable "+capturedErrors" 2>$null
+        Test -ErrorVariable "+capturedErrors" -ErrorAction SilentlyContinue
 
         # Assert
         $capturedErrors.Count | Should -Be 2
