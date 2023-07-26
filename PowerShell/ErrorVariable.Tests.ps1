@@ -39,6 +39,30 @@ Describe "-ErrorVariable" {
         $capturedErrors[1].Exception.Message | Should -BeExact "second"
     }
 
+    It "collects an ActionPreferenceStopException and the first error with -ErrorAction Stop" {
+        # Arrange
+        function Test {
+            [CmdletBinding()]
+            param ()
+
+            Write-Error "first"
+            Write-Error "second"
+        }
+
+        # Act
+        try {
+            Test -ErrorVariable "capturedErrors" -ErrorAction Stop 2>$null
+        }
+        catch {
+        }
+
+        # Assert
+        $capturedErrors.Count | Should -Be 2
+        $capturedErrors[0] -is [System.Management.Automation.ActionPreferenceStopException] | Should -BeTrue
+        $capturedErrors[1] -is [System.Management.Automation.ErrorRecord] | Should -BeTrue
+        $capturedErrors[1].Exception.Message | Should -BeExact "first"
+    }
+
     It "replaces the variable's value" {
         # Arrange
         $capturedErrors = [System.Collections.ArrayList]::new()

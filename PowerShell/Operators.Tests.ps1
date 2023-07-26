@@ -19,7 +19,7 @@ Describe "Operator" {
                 $output[0] -is [string] | Should -BeTrue
             }
 
-            Context "when redirecting stderr" {
+            Context "when redirecting stderr to stdout" {
                 It "returns single-line stderr as a [System.Management.Automation.ErrorRecord]" {
                     # `find x` on
                     # - Linux (GNU): writes 1 line to stderr ("find: ‘x’: No such file or directory");
@@ -85,7 +85,7 @@ Describe "Operator" {
                     $output[0].CategoryInfo.TargetType | Should -BeExact "String"
                 }
 
-                It "sets category info properties" {
+                It "sets other category info properties" {
                     # Act
                     $output = & find test 2>&1
 

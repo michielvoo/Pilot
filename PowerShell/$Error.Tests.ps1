@@ -43,6 +43,30 @@ Describe "`$Error automatic variable" {
         $Error[1].Exception.Message | Should -BeExact "first"
     }
 
+    It "automatically only collects the first error in a [System.Collections.ArrayList] with -ErrorAction Stop" {
+        # Arrange
+        $Error.Clear()
+
+        function Test {
+            [CmdletBinding()]
+            param ()
+
+            Write-Error "first"
+            Write-Error "second"
+        }
+
+        # Act
+        try {
+            Test -ErrorAction Stop 2>$null
+        }
+        catch {
+        }
+
+        # Assert
+        $Error.Count | Should -Be 1
+        $Error[0].Exception.Message | Should -BeExact "first"
+    }
+
     It "automatically prepends errors" {
         # Arrange
         $Error.Clear()
