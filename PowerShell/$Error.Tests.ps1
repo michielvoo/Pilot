@@ -90,20 +90,37 @@ Describe "`$Error automatic variable" {
         $global:Error[1] | Should -BeExact "test"
     }
 
-    It "automatically collects errors from native commands if stderr is redirected" {
-        # The redirection of the error stream in this test is part of the preconditions for this 
+    
+    Context "for native commands when redirecting stderr" {
+        # The redirection of the error stream in these tests is part of the preconditions for this 
         # test to pass in PowerShell's ConsoleHost. Without that redirection, in PowerShell's 
         # ConsoleHost, stderr output is not visible to PowerShell itself.
-        # Fails in PowerShell 7.2
+        if ($PSEdition -eq "Desktop") {
+            It "Windows PowerShell automatically collects errors" {
+                # Arrange
+                $global:Error.Clear()
 
-        # Arrange
-        $global:Error.Clear()
 
-        # Act
-        & find test 2>$null
+                # Act
+                & find test 2>$null
 
-        # Assert
-        $global:Error.Count | Should -Be 1
-        $global:Error[0].Exception.Message | Should -Match "find:"
+                # Assert
+                $global:Error.Count | Should -Be 1
+                $global:Error[0].Exception.Message | Should -Match "find:"
+            }
+        }
+        else {
+            It "PowerShell Core does not automatically collect errors" {
+                # Arrange
+                $global:Error.Clear()
+
+
+                # Act
+                & find test 2>$null
+
+                # Assert
+                $global:Error.Count | Should -Be 0
+            }
+        }
     }
 }
