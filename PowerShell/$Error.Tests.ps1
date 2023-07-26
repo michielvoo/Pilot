@@ -91,9 +91,10 @@ Describe "`$Error automatic variable" {
     }
 
     Context "for native commands when redirecting stderr" {
-        # The redirection of the error stream in these tests is part of the preconditions for this 
-        # test to pass in PowerShell's ConsoleHost. Without that redirection, in PowerShell's 
-        # ConsoleHost, stderr output is not visible to PowerShell itself.
+        # The redirection of the error stream in these tests is part of the preconditions for the 
+        # first test to pass in Windows PowerShell's ConsoleHost. Without that redirection stderr 
+        # output is not visible to (Windows) PowerShell itself.
+
         if ($PSEdition -eq "Desktop") {
             It "automatically collects errors in Windows PowerShell" {
                 # Arrange
@@ -109,7 +110,11 @@ Describe "`$Error automatic variable" {
             }
         }
         else {
-            It "does not automatically collect errors in PowerShell Core" {
+            # Since PowerShell 7.2 the experimental feature PSNotApplyErrorActionToStderr has 
+            # become a mainstream feature. This also affects collection of native command stderr 
+            # in $Error.
+            # See https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-308242927
+            It "does not automatically collect errors in PowerShell" {
                 # Arrange
                 $global:Error.Clear()
 
