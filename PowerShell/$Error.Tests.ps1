@@ -1,3 +1,6 @@
+# The error stream is redirected in these tests just to ensure the errors are not visible in the 
+# host when running these tests.
+
 Describe "`$Error automatic variable" {
     It "automatically collects a single error in a [System.Collections.ArrayList]" {
         # Arrange
@@ -7,7 +10,7 @@ Describe "`$Error automatic variable" {
             [CmdletBinding()]
             param ()
 
-            Write-Error "test"
+            Write-Error "test" 2>$null
         }
 
         # Act
@@ -32,7 +35,7 @@ Describe "`$Error automatic variable" {
         }
 
         # Act
-        Test
+        Test 2>$null
 
         # Assert
         $Error.Count | Should -Be 2
@@ -53,7 +56,7 @@ Describe "`$Error automatic variable" {
         }
 
         # Act
-        Test
+        Test 2>$null
 
         # Assert
         $Error.Count | Should -Be 2
@@ -63,12 +66,16 @@ Describe "`$Error automatic variable" {
         $Error[1]  | Should -BeExact "test"
     }
 
-    It "automatically collects errors from native commands" {
+    It "automatically collects errors from native commands if stderr is redirected" {
+        # The redirection of the error stream in this test is part of the preconditions for this 
+        # test to pass in PowerShell's ConsoleHost. Without that redirection, in PowerShell's 
+        # ConsoleHost, stderr output is not visible to PowerShell itself.
+
         # Arrange
         $Error.Clear()
 
         # Act
-        & find test
+        & find test 2>$null
 
         # Assert
         $Error.Count | Should -Be 1

@@ -1,3 +1,6 @@
+# The error stream is redirected in these tests just to ensure the errors are not visible in the 
+# host when running these tests.
+
 Describe "-ErrorVariable" {
     It "collects a single error in a [System.Collections.ArrayList]" {
         # Arrange
@@ -9,7 +12,7 @@ Describe "-ErrorVariable" {
         }
 
         # Act
-        Test -ErrorVariable "capturedErrors"
+        Test -ErrorVariable "capturedErrors" 2>$null
 
         # Assert
         $capturedErrors -is [System.Collections.ArrayList] | Should -BeTrue
@@ -28,7 +31,7 @@ Describe "-ErrorVariable" {
         }
 
         # Act
-        Test -ErrorVariable "capturedErrors"
+        Test -ErrorVariable "capturedErrors" 2>$null
 
         # Assert
         $capturedErrors.Count | Should -Be 2
@@ -45,7 +48,7 @@ Describe "-ErrorVariable" {
             [CmdletBinding()]
             param ()
 
-            Write-Error "error"
+            Write-Error "error" 2>$null
         }
 
         # Act
@@ -70,7 +73,7 @@ Describe "-ErrorVariable" {
         }
 
         # Act
-        Test -ErrorVariable "+capturedErrors"
+        Test -ErrorVariable "+capturedErrors" 2>$null
 
         # Assert
         $capturedErrors.Count | Should -Be 2
