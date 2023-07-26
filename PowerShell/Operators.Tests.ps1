@@ -19,6 +19,21 @@ Describe "Operator" {
                 $output[0] -is [string] | Should -BeTrue
             }
 
+            It "sets `$LASTEXITCODE" {
+                # `find x` on
+                # - Linux (GNU): exits with 1;
+                # - macOS:       exits with 1;
+                # - Windows:     exits with 2.
+
+                # Act
+                & find x 2>&1
+
+                # Assert
+                $value = $LASTEXITCODE
+                $value | Should -BeGreaterThan 0
+                $value | Should -BeLessThan 3
+            }
+
             Context "when redirecting stderr to stdout" {
                 It "returns single-line stderr as a [System.Management.Automation.ErrorRecord]" {
                     # `find x` on
