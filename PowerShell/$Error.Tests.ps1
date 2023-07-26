@@ -4,27 +4,27 @@
 Describe "`$Error automatic variable" {
     It "automatically collects a single error in a [System.Collections.ArrayList]" {
         # Arrange
-        $Error.Clear()
+        $global:Error.Clear()
 
         function Test {
             [CmdletBinding()]
             param ()
 
-            Write-Error "test" 2>$null
+            Write-Error "test"
         }
 
         # Act
-        Test
-
+        Test 2>$null
+        
         # Assert
-        $Error -is [System.Collections.ArrayList] | Should -BeTrue
-        $Error[0] -is [System.Management.Automation.ErrorRecord] | Should -BeTrue
-        $Error[0].Exception.Message | Should -BeExact "test"
+        $global:Error -is [System.Collections.ArrayList] | Should -BeTrue -Because "`$Error is an ArrayList"
+        $global:Error[0] | Should -BeOfType [System.Management.Automation.ErrorRecord]
+        $global:Error[0].Exception.Message | Should -BeExact "test"
     }
 
     It "automatically collects multiple errors in a [System.Collections.ArrayList] in reverse order" {
         # Arrange
-        $Error.Clear()
+        $global:Error.Clear()
 
         function Test {
             [CmdletBinding()]
@@ -38,14 +38,14 @@ Describe "`$Error automatic variable" {
         Test 2>$null
 
         # Assert
-        $Error.Count | Should -Be 2
-        $Error[0].Exception.Message | Should -BeExact "second"
-        $Error[1].Exception.Message | Should -BeExact "first"
+        $global:Error.Count | Should -Be 2
+        $global:Error[0].Exception.Message | Should -BeExact "second"
+        $global:Error[1].Exception.Message | Should -BeExact "first"
     }
 
     It "automatically only collects the first error in a [System.Collections.ArrayList] with -ErrorAction Stop" {
         # Arrange
-        $Error.Clear()
+        $global:Error.Clear()
 
         function Test {
             [CmdletBinding()]
@@ -63,14 +63,14 @@ Describe "`$Error automatic variable" {
         }
 
         # Assert
-        $Error.Count | Should -Be 1
-        $Error[0].Exception.Message | Should -BeExact "first"
+        $global:Error.Count | Should -Be 1
+        $global:Error[0].Exception.Message | Should -BeExact "first"
     }
 
     It "automatically prepends errors" {
         # Arrange
-        $Error.Clear()
-        $Error.Add("test");
+        $global:Error.Clear()
+        $global:Error.Add("test");
 
         function Test {
             [CmdletBinding()]
@@ -83,11 +83,11 @@ Describe "`$Error automatic variable" {
         Test 2>$null
 
         # Assert
-        $Error.Count | Should -Be 2
-        $Error[0] -is [System.Management.Automation.ErrorRecord] | Should -BeTrue
-        $Error[0].Exception.Message | Should -BeExact "error"
-        $Error[1] -is [string] | Should -BeTrue
-        $Error[1]  | Should -BeExact "test"
+        $global:Error.Count | Should -Be 2
+        $global:Error[0] | Should -BeOfType [System.Management.Automation.ErrorRecord]
+        $global:Error[0].Exception.Message | Should -BeExact "error"
+        $global:Error[1] -is [string] | Should -BeTrue
+        $global:Error[1] | Should -BeExact "test"
     }
 
     It "automatically collects errors from native commands if stderr is redirected" {
@@ -96,13 +96,13 @@ Describe "`$Error automatic variable" {
         # ConsoleHost, stderr output is not visible to PowerShell itself.
 
         # Arrange
-        $Error.Clear()
+        $global:Error.Clear()
 
         # Act
         & find test 2>$null
 
         # Assert
-        $Error.Count | Should -Be 1
-        $Error[0].Exception.Message | Should -Match "find:"
+        $global:Error.Count | Should -Be 1
+        $global:Error[0].Exception.Message | Should -Match "find:"
     }
 }
