@@ -1,5 +1,6 @@
 function Invoke-NativeCommand {
     [CmdletBinding()]
+    [OutputType([hashtable])]
     param (
         [Parameter(Mandatory, Position = 0)]
         [string] $LiteralPath,
