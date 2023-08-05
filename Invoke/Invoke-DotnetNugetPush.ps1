@@ -19,7 +19,9 @@ function Invoke-DotnetNugetPush {
         [Parameter()]
         [switch] $ForceEnglishOutput,
 
-        # Allows the command to stop and wait for user input or action. For example, to complete authentication. Available since .NET Core 3.0 SDK.
+        # Allows the command to stop and wait for user input or action. For example, to complete
+        # authentication.
+        # Available since .NET Core 3.0 SDK.
         [Parameter()]
         [switch]$Interactive,
 
@@ -37,12 +39,14 @@ function Invoke-DotnetNugetPush {
         [Parameter()]
         [switch]$NoServiceEndpoint,
 
-        # Specifies the server URL. NuGet identifies a UNC or local folder source and simply copies the file there instead of pushing it using HTTP.
+        # Specifies the server URL. NuGet identifies a UNC or local folder source and simply copies
+        # the file there instead of pushing it using HTTP.
         [Alias("S")]
         [Parameter()]
         [string]$Source,
 
-        # When pushing multiple packages to an HTTP(S) server, treats any 409 Conflict response as a warning so that other pushes can continue.
+        # When pushing multiple packages to an HTTP(S) server, treats any 409 Conflict response as
+        # a warning so that other pushes can continue.
         [Parameter()]
         [switch]$SkipDuplicate,
 
@@ -57,7 +61,8 @@ function Invoke-DotnetNugetPush {
         [Parameter()]
         [string]$SymbolSource,
 
-        # Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds (5 minutes). Specifying 0 applies the default value.
+        # Specifies the timeout for pushing to a server in seconds. Defaults to 300 seconds
+        # (5 minutes). Specifying 0 applies the default value.
         [Alias("T")]
         [Parameter()]
         [int]$Timeout
