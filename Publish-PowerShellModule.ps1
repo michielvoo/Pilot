@@ -126,6 +126,7 @@ Function Publish-PowerShellModule
     New-Item -ItemType Directory -Path $tempModulePath | Out-Null
 
     Write-Warning "Created temporary directory $tempModulePath"
+    Write-Warning "Manifest file list is $($manifest.FileList)"
 
     ForEach ($path in $manifest.FileList)
     {
