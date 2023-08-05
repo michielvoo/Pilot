@@ -70,19 +70,17 @@ Describe Invoke-NativeCommand {
         $result.Stderr[1] | Should -BeExactly "err2"
     }
 
-    Context "when `$ErrorActionPreference is set to Stop" {
-        It "throws?" {
-            # Arrange
-            $preference = $ErrorActionPreference
-            $ErrorActionPreference = "Stop"
+    It "does not throw when `$ErrorActionPreference is set to Stop" {
+        # Arrange
+        $preference = $ErrorActionPreference
+        $ErrorActionPreference = "Stop"
 
-            try {
-                # Act
-                { Invoke-NativeCommand $output --stderr err } | Should -Throw
-            }
-            finally {
-                $ErrorActionPreference = $preference
-            }
+        try {
+            # Act
+            { Invoke-NativeCommand $output --stderr err } | Should -Not -Throw
+        }
+        finally {
+            $ErrorActionPreference = $preference
         }
     }
 }

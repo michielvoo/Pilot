@@ -15,8 +15,13 @@ function Invoke-NativeCommand {
         Stdout = @()
     }
 
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+
     $output = & $LiteralPath @Arguments 2>&1
     $result.ExitCode = $LASTEXITCODE
+
+    $ErrorActionPreference = $previousErrorActionPreference
 
     foreach ($item in $output) {
         if ($item -is [string]) {
