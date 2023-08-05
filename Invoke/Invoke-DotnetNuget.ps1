@@ -2,6 +2,7 @@
 
 function Invoke-DotnetNuget {
     [CmdletBinding()]
+    [OutputType([hashtable])]
     param (
         [Parameter(Mandatory, Position = 0)]
         [string]$Command,

@@ -6,7 +6,7 @@ BeforeAll {
 }
 
 Describe Invoke-DotnetNuget {
-    It "Invokes the dotnet with the nuget command and any arguments" {
+    It "invokes dotnet with the nuget command and any arguments" {
         # Act
         Invoke-DotnetNuget command --option arg 
 
