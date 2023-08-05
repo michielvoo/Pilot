@@ -91,12 +91,15 @@ Describe "Operator" {
                     $output[2].FullyQualifiedErrorId | Should -BeExact "NativeCommandErrorMessage"
                 }
 
-                It "sets target object to the stderr line" {
+                It "sets target object of the first error record to the stderr line" {
                     # Act
                     $output = & find test 2>&1
 
                     # Assert
                     $output[0].TargetObject | Should -Match "find:"
+
+                    # Assert that the exception's message is also set to the stderr line
+                    $output[0].Exception.Message | Should -Match "find:"
                 }
 
                 It "sets category info target name to the stderr line" {

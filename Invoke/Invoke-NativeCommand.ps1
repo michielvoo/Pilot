@@ -27,8 +27,7 @@ function Invoke-NativeCommand {
                 $result.Stderr += $item.TargetObject
             }
             else {
-                Write-Warning "`$item.TargetObject is `$null, but `$item.Exception.Message is $($item.Exception.Message)"
-
+                $result.Stderr += $item.Exception.Message
             }
         }
     }
