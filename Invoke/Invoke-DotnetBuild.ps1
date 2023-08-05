@@ -85,7 +85,6 @@ function Invoke-DotnetBuild {
         # `./bin/<configuration>/<framework>/`. For projects with multiple target frameworks (via 
         # the `TargetFrameworks` property), you also need to define `-Framework` when you specify 
         # this option.
-
         [Alias("O")]
         [Parameter()]
         [string]$Output,
@@ -98,7 +97,7 @@ function Invoke-DotnetBuild {
         # Specifies the target runtime. For a list of Runtime Identifiers (RIDs), see the RID 
         # catalog. If you use this option with .NET 6 SDK, use `-SelfContained` or 
         # `-NoSelfContained` also. If not specified, the default is to build for the current OS and
-        #  architecture.
+        # architecture.
         [Alias("R")]
         [Parameter()]
         [string]$Runtime,
