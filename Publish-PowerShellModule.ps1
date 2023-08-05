@@ -125,7 +125,6 @@ Function Publish-PowerShellModule
         -ChildPath $Name
     New-Item -ItemType Directory -Path $tempModulePath | Out-Null
 
-    Write-Warning "Created temporary directory $tempModulePath"
     Write-Warning "Manifest file list is $($manifest.FileList)"
 
     ForEach ($path in $manifest.FileList)
@@ -138,9 +137,7 @@ Function Publish-PowerShellModule
     }
 
     # Adjust manifest path
-    Write-Warning "Manifest path is $manifestPath"
     $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
-    Write-Warning "Resolved manifest path is $resolvedManifestPath"
     $manifestPath = Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
 
     # Versioning
