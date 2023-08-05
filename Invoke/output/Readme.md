@@ -17,6 +17,7 @@ Simple executable that prints `--stdout` and `--stderr` arguments to `stdout` or
 GOOS=darwin GOARCH=amd64 go build -o darwin/amd64/output .
 GOOS=darwin GOARCH=arm64 go build -o darwin/arm64/output .
 GOOS=linux GOARCH=amd64 go build -o linux/amd64/output .
+GOOS=linux GOARCH=arm64 go build -o linux/arm64/output .
 GOOS=windows GOARCH=amd64 go build -o windows/amd64/output.exe .
 GOOS=windows GOARCH=arm64 go build -o windows/arm64/output.exe .
 ```
