@@ -125,16 +125,22 @@ Function Publish-PowerShellModule
         -ChildPath $Name
     New-Item -ItemType Directory -Path $tempModulePath | Out-Null
 
+    Write-Warning "Created temporary directory $tempModulePath"
+
     ForEach ($path in $manifest.FileList)
     {
         $relativePath = Resolve-Path -Path $path -Relative
         $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
         New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
         Copy-Item -Path $path -Destination $absolutePath
+        Write-Warning "Copied $path to $absolutePath"
     }
 
     # Adjust manifest path
-    $manifestPath = Join-Path -Path $tempModulePath -ChildPath (Resolve-Path -Path $manifestPath -Relative) -Resolve
+    Write-Warning "Manifest path is $manifestPath"
+    $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
+    Write-Warning "Resolved manifest path is $resolvedManifestPath"
+    $manifestPath = Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
 
     # Versioning
     [Version] $version = $manifest.Version
