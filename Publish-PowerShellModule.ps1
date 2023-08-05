@@ -244,10 +244,7 @@ Function Publish-PowerShellModule
     If ($NuGetUrl -and $NuGetApiKey)
     {
         Get-ChildItem $ArtifactsPath "*.nupkg" | ForEach-Object {
-            dotnet nuget push "$($_.FullName)" `
-                --api-key "$NuGetApiKey" `
-                --skip-duplicate `
-                --source "$NuGetUrl"
+            Invoke-DotnetNugetPush $_.FullName -ApiKey $NuGetApiKey -SkipDuplicate -Source $NuGetUrl
         }
     }
 }
