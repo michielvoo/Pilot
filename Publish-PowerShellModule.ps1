@@ -125,15 +125,12 @@ Function Publish-PowerShellModule
         -ChildPath $Name
     New-Item -ItemType Directory -Path $tempModulePath | Out-Null
 
-    Write-Warning "Manifest file list is $($manifest.FileList)"
-
     ForEach ($path in $manifest.FileList)
     {
         $relativePath = Resolve-Path -Path $path -Relative
         $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
         New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
         Copy-Item -Path $path -Destination $absolutePath
-        Write-Warning "Copied $path to $absolutePath"
     }
 
     # Adjust manifest path
