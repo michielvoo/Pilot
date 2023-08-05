@@ -17,13 +17,19 @@ function Invoke-NativeCommand {
     $output = & $LiteralPath @Arguments 2>&1
     $result.ExitCode = $LASTEXITCODE
 
-    foreach ($line in $output) {
-        if ($line -is [string]) {
-            $result.Stdout += $line
+    foreach ($item in $output) {
+        if ($item -is [string]) {
+            $result.Stdout += $item
         }
 
-        if ($line -is [System.Management.Automation.ErrorRecord]) {
-            $result.Stderr += $line.TargetObject
+        if ($item -is [System.Management.Automation.ErrorRecord]) {
+            if ($null -ne $item.TargetObject) {
+                $result.Stderr += $item.TargetObject
+            }
+            else {
+                Write-Warning "`$item.TargetObject is `$null, but `$item.Exception.Message is $($item.Exception.Message)"
+
+            }
         }
     }
 
