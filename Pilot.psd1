@@ -23,7 +23,7 @@
         "Publish-PowerShellModule"
     )
     GUID = "ffc50278-3ae6-4f6d-88b5-9aec7043bc27"
-    ModuleVersion = "0.0.5"
+    ModuleVersion = "0.0.6"
     NestedModules = @(
         "Invoke/Invoke.psm1"
         "Pathfinder/Pathfinder.psm1"

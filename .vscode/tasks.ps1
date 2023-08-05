@@ -1,6 +1,9 @@
 param (
     [Parameter(Mandatory, Position = 0)]
-    [string] $Task
+    [string] $Task,
+
+    [Parameter(ValueFromRemainingArguments)]
+    [string[]] $Arguments
 )
 
 switch ($Task) {
@@ -10,7 +13,28 @@ switch ($Task) {
     }
 
     "Test" {
-        Invoke-Pester ${workspaceFolder}
+        $path = $Arguments[0]
+        if ($null -eq $path) {
+            Write-Warning "Test task requires a path"
+        }
+        elseif (-not (Test-Path $path)) {
+            Write-Warning "$path not found"
+        }
+        elseif ((Get-Item $path).PSIsContainer) {
+            Invoke-Pester $path
+        }
+        elseif ($path.EndsWith(".Tests.ps1")) {
+            Invoke-Pester $path
+        }
+        elseif (-not ($path.EndsWith(".ps1"))) {
+            Write-Warning "Cannot test $(Split-Path $path -Leaf)"
+        }
+        elseif (-not (Test-Path $path.Replace(".ps1", ".Tests.ps1"))) {
+            Write-Warning "$(Split-Path $path -Leaf) has no tests"
+        }
+        else {
+            Invoke-Pester $path.Replace(".ps1", ".Tests.ps1")
+        }
     }
 
     "Run" {
