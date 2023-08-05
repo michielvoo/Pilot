@@ -79,7 +79,16 @@ Function Publish-PowerShellModule
             {
                 $e = "$($_.Result): $($_.ExpandedPath)"
                 foreach ($errorRecord in $_.ErrorRecord) {
-                    $e = "${e}: $errorRecord"
+                    $category = $errorRecord.CategoryInfo.Category
+                    if ($category -eq ([System.Management.Automation.ErrorCategory]::InvalidResult)) {
+                        $exceptionMessage = $errorRecord.Exception.Message
+                        $e = "${e}: $exceptionMessage"
+                    }
+                    else {
+                        # Category will be NotSpecified
+                        $e = "${e}: An unexpected error occurred during execution of this test"
+                    }
+
                     break
                 }
                 $errors += $e
@@ -125,7 +134,8 @@ Function Publish-PowerShellModule
     }
 
     # Adjust manifest path
-    $manifestPath = Join-Path -Path $tempModulePath -ChildPath (Resolve-Path -Path $manifestPath -Relative) -Resolve
+    $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
+    $manifestPath = Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
 
     # Versioning
     [Version] $version = $manifest.Version
@@ -235,10 +245,7 @@ Function Publish-PowerShellModule
     If ($NuGetUrl -and $NuGetApiKey)
     {
         Get-ChildItem $ArtifactsPath "*.nupkg" | ForEach-Object {
-            dotnet nuget push "$($_.FullName)" `
-                --api-key "$NuGetApiKey" `
-                --skip-duplicate `
-                --source "$NuGetUrl"
+            Invoke-DotnetNugetPush $_.FullName -ApiKey $NuGetApiKey -SkipDuplicate -Source $NuGetUrl
         }
     }
 }
