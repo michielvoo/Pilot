@@ -6,39 +6,39 @@ BeforeAll {
 }
 
 Describe Invoke-DotnetNugetPush {
-    It "invokes dotnet nuget push with arguments" {
+    It "invokes dotnet nuget with command push and arguments" {
         # Act
         $parameters = @{
-            ApiKey = 2
+            ApiKey = 1
             DisableBuffering = $true
             ForceEnglishOutput = $true
             Interactive = $true
             NoServiceEndpoint = $true
             NoSymbols = $true
             SkipDuplicate = $true
-            Source = 3
-            SymbolApiKey = 4
-            SymbolSource = 5
-            Timeout = 6
+            Source = 2
+            SymbolApiKey = 3
+            SymbolSource = 4
+            Timeout = 5
         }
-        Invoke-DotnetNugetPush 1 @parameters
+        Invoke-DotnetNugetPush pkg @parameters
 
         # Assert
         Should -Invoke Invoke-DotnetNuGet -ParameterFilter {
             $Command | Should -BeExactly "push"
             $Arguments | Should -Be @(
-                1
-                "--api-key", 2
+                "pkg"
+                "--api-key", 1
                 "--disable-buffering"
                 "--force-english-output"
                 "--interactive"
                 "--no-service-endpoint"
                 "--no-symbols"
                 "--skip-duplicate"
-                "--source", 3
-                "--symbol-api-key", 4
-                "--symbol-source", 5
-                "--timeout", 6
+                "--source", 2
+                "--symbol-api-key", 3
+                "--symbol-source", 4
+                "--timeout", 5
             )
             $true
         }

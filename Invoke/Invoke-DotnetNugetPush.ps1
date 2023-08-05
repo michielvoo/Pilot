@@ -1,5 +1,7 @@
 . (Join-Path $PSScriptRoot "Invoke-DotnetNuget.ps1")
 
+# .SYNOPSIS
+# Pushes a package to the server and publishes it.
 function Invoke-DotnetNugetPush {
     [CmdletBinding()]
     [OutputType([hashtable])]
