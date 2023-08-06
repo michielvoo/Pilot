@@ -21,7 +21,7 @@ Describe Invoke-DotnetClean {
 
         # Assert
         Should -Invoke Invoke-Dotnet -ParameterFilter {
-            $Command | Should -BeExactly "build"
+            $Command | Should -BeExactly "clean"
             $i = 0
             @(
                 "sln"

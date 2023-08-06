@@ -1,5 +1,7 @@
 . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
+# https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-clean
+
 # .SYNOPSIS
 # Cleans the output of a project.
 # .DESCRIPTION
@@ -12,7 +14,7 @@ function Invoke-DotnetClean {
     param (
         # The MSBuild project or solution to clean.
         [Parameter(Mandatory, Position = 0)]
-        [string] $Solution,
+        [string] $ProjectOrSolution,
 
         # Defines the build configuration. The default for most projects is `Debug`, but you can
         # override the build configuration settings in your project. This option is only required
@@ -53,11 +55,12 @@ function Invoke-DotnetClean {
 
         # Sets the verbosity level of the command. Allowed values are `Q[uiet]`, `M[inimal]`,
         # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Normal`.
+        [Alias("V")]
         [Parameter()]
         [string]$Verbosity
     )
 
-    $Arguments = @($Solution)
+    $Arguments = @($ProjectOrSolution)
 
     if ($Configuration) {
         $Arguments += "--configuration",$Configuration
@@ -87,5 +90,5 @@ function Invoke-DotnetClean {
         $Arguments += "--verbosity",$Verbosity
     }
 
-    Invoke-Dotnet "build" @Arguments
+    Invoke-Dotnet "clean" @Arguments
 }

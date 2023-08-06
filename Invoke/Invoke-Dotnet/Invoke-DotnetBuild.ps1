@@ -1,5 +1,7 @@
 . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
+# https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build
+
 # .SYNOPSIS
 # Builds a project and all of its dependencies.
 function Invoke-DotnetBuild {
@@ -127,6 +129,7 @@ function Invoke-DotnetBuild {
         # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Minimal`. By default,
         # MSBuild displays warnings and errors at all verbosity levels. To exclude warnings, use
         # `-Properties @{ WarningLevel = 0 }`.
+        [Alias("V")]
         [Parameter()]
         [string]$Verbosity,
 
