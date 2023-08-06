@@ -21,6 +21,7 @@ function Invoke-DotnetMSBuild {
 
         # Show detailed information at the end of the build log about the configurations that were
         # built and how they were scheduled to nodes.
+        [Alias("DS")]
         [Parameter()]
         [switch]$DetailedSummary,
 
@@ -29,15 +30,18 @@ function Invoke-DotnetMSBuild {
         # attempting to build project references prior to the projects that reference them,
         # differing from traditional MSBuild scheduling.
         # Requires MSBuild 16 or later.
+        [Alias("Graph")]
         [Parameter()]
         [switch]$GraphBuild,
 
         # Ignore the specified extensions when determining which project file to build.
+        [Alias("Ignore")]
         [Parameter()]
         [string[]]$IgnoreProjectExtensions,
 
         # List of input cache files that MSBuild will read build results from. If
         # `-IsolateProjects` is set to `False`, this sets it to `True`.
+        [Alias("IRC")]
         [Parameter()]
         [string[]]$InputResultsCaches,
 
@@ -55,10 +59,12 @@ function Invoke-DotnetMSBuild {
         # example, the definition of a property.) This is a more restrictive mode of MSBuild as it
         # requires that the project graph be statically discoverable at evaluation time, but can
         # improve scheduling and reduce memory overhead when building a large set of projects.
+        [Alias("Isolate")]
         [Parameter()]
         [string]$IsolateProjects,
 
         # Causes MSBuild to run at low process priority.
+        [Alias("Low")]
         [Parameter()]
         [switch]$LowPriority,
 
@@ -66,10 +72,12 @@ function Invoke-DotnetMSBuild {
         # include this switch, the default value is 1.
         # TODO: If you include this switch without specifying a value, MSBuild will use up to the
         # number of processors in the computer.
+        [Alias("M")]
         [Parameter()]
         [int]$MaxCpuCount,
 
         # Don't include any MSBuild.rsp or Directory.Build.rsp files automatically.
+        [Alias("NoAutoRsp")]
         [Parameter()]
         [switch]$NoAutoResponse,
 
@@ -78,6 +86,7 @@ function Invoke-DotnetMSBuild {
         # $false. Nodes don't remain after the build completes.
         # A node corresponds to a project that's executing. If you include the `-MaxCpuCount`
         # switch, multiple nodes can execute concurrently.
+        [Alias("NR")]
         [Parameter()]
         [switch]$NodeReuse,
 
@@ -91,11 +100,13 @@ function Invoke-DotnetMSBuild {
         # which files contribute to the build. When you use this switch, the project isn't built.
         # If you specify a filepath, the aggregated project file is output to the file. Otherwise,
         # the output appears in the console window.
+        [Alias("PP")]
         [Parameter()]
         [string]$Preprocess,
 
         # Output cache file where MSBuild will write the contents of its build result caches at the
         # end of the build. If `-IsolateProjects` is not set, this sets it.
+        [Alias("ORC")]
         [Parameter()]
         [string]$OutputResultsCache,
 
@@ -106,21 +117,25 @@ function Invoke-DotnetMSBuild {
         [string]$ProfileEvaluation,
 
         # Set or override the specified project-level properties.
+        [Alias("P")]
         [Parameter()]
         [hashtable]$Properties,
 
         # Runs the `Restore` target prior to building the actual targets.
+        [Alias("R")]
         [Parameter()]
         [switch]$Restore,
 
         # Set or override these project-level properties only during restore and do not use
-        # properties specified with the `-Properties` parameter. 
+        # properties specified with the `-Properties` parameter.
+        [Alias("RP")]
         [Parameter()]
         [hashtable]$RestoreProperties,
 
         # Build the specified targets in the project. If you specify any targets by using this
         # parameter, they are run instead of any targets in the `DefaultTargets` attribute in the
-        # project file. 
+        # project file.
+        [Alias("T")]
         [Parameter()]
         [string[]]$Target,
 
