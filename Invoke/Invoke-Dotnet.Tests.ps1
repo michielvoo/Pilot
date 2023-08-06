@@ -13,7 +13,15 @@ Describe Invoke-Dotnet {
         # Assert
         Should -Invoke Invoke-NativeCommand -ParameterFilter {
             $LiteralPath | Should -BeExactly "dotnet"
-            $Arguments | Should -Be @("command", "--option", "arg")
+            $i = 0
+            @(
+                "command",
+                "--option",
+                "arg"
+            ) | ForEach-Object {
+                $Arguments[$i++] | Should -BeExactly $_
+            }
+
             $true
         }
     }

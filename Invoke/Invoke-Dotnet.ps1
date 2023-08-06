@@ -1,5 +1,6 @@
 . (Join-Path $PSScriptRoot "Invoke-NativeCommand.ps1")
 
+# The generic driver for the .NET CLI.
 function Invoke-Dotnet {
     [CmdletBinding()]
     [OutputType([hashtable])]

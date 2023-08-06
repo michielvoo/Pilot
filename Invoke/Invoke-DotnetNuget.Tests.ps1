@@ -13,7 +13,15 @@ Describe Invoke-DotnetNuget {
         # Assert
         Should -Invoke Invoke-Dotnet -ParameterFilter {
             $Command | Should -BeExactly "nuget"
-            $Arguments | Should -Be @("command", "--option", "arg")
+            $i = 0
+            @(
+                "command",
+                "--option",
+                "arg"
+            ) | ForEach-Object {
+                $Arguments[$i++] | Should -BeExactly $_
+            }
+
             $true
         }
     }
