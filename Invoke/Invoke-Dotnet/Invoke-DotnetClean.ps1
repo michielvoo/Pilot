@@ -1,5 +1,7 @@
 . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
+# https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-clean
+
 # .SYNOPSIS
 # Cleans the output of a project.
 # .DESCRIPTION
@@ -10,9 +12,11 @@ function Invoke-DotnetClean {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param (
-        # The MSBuild project or solution to clean.
-        [Parameter(Mandatory, Position = 0)]
-        [string] $Solution,
+        # The MSBuild project or solution to clean. If a project or solution file is not specified,
+        # MSBuild searches the current working directory for a file that has a file extension that
+        # ends in proj or sln, and uses that file.
+        [Parameter(Position = 0)]
+        [string] $ProjectOrSolution,
 
         # Defines the build configuration. The default for most projects is `Debug`, but you can
         # override the build configuration settings in your project. This option is only required
@@ -53,11 +57,14 @@ function Invoke-DotnetClean {
 
         # Sets the verbosity level of the command. Allowed values are `Q[uiet]`, `M[inimal]`,
         # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Normal`.
+        [Alias("V")]
         [Parameter()]
         [string]$Verbosity
     )
 
-    $Arguments = @($Solution)
+    if ($ProjectOrSolution) {
+        $Arguments = @($ProjectOrSolution)
+    }
 
     if ($Configuration) {
         $Arguments += "--configuration",$Configuration
@@ -87,5 +94,5 @@ function Invoke-DotnetClean {
         $Arguments += "--verbosity",$Verbosity
     }
 
-    Invoke-Dotnet "build" @Arguments
+    Invoke-Dotnet "clean" @Arguments
 }

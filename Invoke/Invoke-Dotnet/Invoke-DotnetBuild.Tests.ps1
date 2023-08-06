@@ -1,18 +1,17 @@
 BeforeAll {
     . $PSCommandPath.Replace(".Tests.ps1", ".ps1")
-    . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
-    Mock Invoke-Dotnet {}
+    Mock Invoke-Dotnet
 }
 
 Describe Invoke-DotnetBuild {
-    It "invokes dotnet with command build and arguments" {
+    It "invokes Invoke-Dotnet with command build and arguments" {
         # Act
         $parameters = @{
             Arch = 1
             Configuration = 2
-            Framework = 3
             DisableBuildServers = $true
+            Framework = 3
             Force = $true
             Interactive = $true
             NoDependencies = $true
@@ -20,8 +19,8 @@ Describe Invoke-DotnetBuild {
             NoRestore = $true
             NoLogo = $true
             NoSelfContained = $true
-            OS = 4
-            Output = 5
+            Output = 4
+            OS = 5
             Properties = @{
                 PropertyB = "B"
                 PropertyA = "A"
@@ -31,8 +30,8 @@ Describe Invoke-DotnetBuild {
             SelfContained = $true
             Source = 7
             TL = 8
-            UseCurrentRuntime = $true
             Verbosity = 9
+            UseCurrentRuntime = $true
             VersionSuffix = 10
         }
         Invoke-DotnetBuild sln @parameters
@@ -45,8 +44,8 @@ Describe Invoke-DotnetBuild {
                 "sln"
                 "--arch", 1
                 "--configuration", 2
-                "--framework", 3
                 "--disable-build-servers"
+                "--framework", 3
                 "--force"
                 "--interactive"
                 "--no-dependencies"
@@ -54,17 +53,17 @@ Describe Invoke-DotnetBuild {
                 "--no-restore"
                 "--nologo"
                 "--no-self-contained"
-                "--os", 4
-                "--output", 5
+                "--output", 4
+                "--os", 5
                 "--property:PropertyA=A"
                 "--property:PropertyB=B"
                 "--property:PropertyC=C"
                 "--runtime", 6
-                "--self-contained"
+                "--self-contained", "true"
                 "--source", 7
                 "--tl", 8
-                "--use-current-runtime"
                 "--verbosity", 9
+                "--use-current-runtime", "true"
                 "--version-suffix", 10
             ) | ForEach-Object {
                 $Arguments[$i++] | Should -BeExactly $_

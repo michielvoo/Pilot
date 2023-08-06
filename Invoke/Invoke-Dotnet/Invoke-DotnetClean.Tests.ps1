@@ -1,12 +1,11 @@
 BeforeAll {
     . $PSCommandPath.Replace(".Tests.ps1", ".ps1")
-    . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
-    Mock Invoke-Dotnet {}
+    Mock Invoke-Dotnet
 }
 
 Describe Invoke-DotnetClean {
-    It "invokes dotnet with command clean and arguments" {
+    It "invokes Invoke-Dotnet with command clean and arguments" {
         # Act
         $parameters = @{
             Configuration = 1
@@ -21,7 +20,7 @@ Describe Invoke-DotnetClean {
 
         # Assert
         Should -Invoke Invoke-Dotnet -ParameterFilter {
-            $Command | Should -BeExactly "build"
+            $Command | Should -BeExactly "clean"
             $i = 0
             @(
                 "sln"

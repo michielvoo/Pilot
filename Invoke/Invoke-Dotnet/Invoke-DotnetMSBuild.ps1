@@ -1,5 +1,7 @@
 . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
+# https://learn.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
+
 # .SYNOPSIS
 # Builds a project and all of its dependencies. Note: A solution or project file may need to be
 # specified if there are multiple.
@@ -23,7 +25,8 @@ function Invoke-DotnetMSBuild {
         # built and how they were scheduled to nodes.
         [Alias("DS")]
         [Parameter()]
-        [switch]$DetailedSummary,
+        [ValidateSet($null, $true, $false)]
+        [object]$DetailedSummary,
 
         # Causes MSBuild to construct and build a project graph. Constructing a graph involves
         # identifying project references to form dependencies. Building that graph involves
@@ -32,7 +35,8 @@ function Invoke-DotnetMSBuild {
         # Requires MSBuild 16 or later.
         [Alias("Graph")]
         [Parameter()]
-        [switch]$GraphBuild,
+        [ValidateSet($null, $true, $false)]
+        [object]$GraphBuild,
 
         # Ignore the specified extensions when determining which project file to build.
         [Alias("Ignore")]
@@ -49,11 +53,12 @@ function Invoke-DotnetMSBuild {
         # this argument in an automated scenario where interactivity is not expected. Use the
         # parameter to override a value that comes from a response file.
         [Parameter()]
-        [switch]$Interactive,
+        [ValidateSet($null, $true, $false)]
+        [object]$Interactive,
 
         # Causes MSBuild to build each project in isolation. When set to `MessageUponIsolationViolation`
         # (or its short form `Message`), only the results from top-level targets are serialized if
-        # the -OutputResultsCache` switch is supplied. This is to mitigate the chances of an
+        # the `-OutputResultsCache` switch is supplied. This is to mitigate the chances of an
         # isolation-violating target on a dependency project using incorrect state due to its
         # dependency on a cached target whose side effects would not be taken into account. (For
         # example, the definition of a property.) This is a more restrictive mode of MSBuild as it
@@ -66,15 +71,16 @@ function Invoke-DotnetMSBuild {
         # Causes MSBuild to run at low process priority.
         [Alias("Low")]
         [Parameter()]
-        [switch]$LowPriority,
+        [ValidateSet($null, $true, $false)]
+        [object]$LowPriority = $null,
 
         # Specifies the maximum number of concurrent processes to use when building. If you don't
-        # include this switch, the default value is 1.
-        # TODO: If you include this switch without specifying a value, MSBuild will use up to the
-        # number of processors in the computer.
+        # include this parameter, the default value is 1. If you include this parameter and
+        # specify `$true`, MSBuild will use up to the number of processors in the computer.
         [Alias("M")]
         [Parameter()]
-        [int]$MaxCpuCount,
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or ($_ -is [int] -and $_ -gt 0) })]
+        [object]$MaxCpuCount,
 
         # Don't include any MSBuild.rsp or Directory.Build.rsp files automatically.
         [Alias("NoAutoRsp")]
@@ -88,7 +94,8 @@ function Invoke-DotnetMSBuild {
         # switch, multiple nodes can execute concurrently.
         [Alias("NR")]
         [Parameter()]
-        [switch]$NodeReuse,
+        [ValidateSet($null, $true, $false)]
+        [object]$NodeReuse,
 
         # Don't display the startup banner or the copyright message.
         [Parameter()]
@@ -102,13 +109,15 @@ function Invoke-DotnetMSBuild {
         # the output appears in the console window.
         [Alias("PP")]
         [Parameter()]
-        [string]$Preprocess,
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] })]
+        [object]$Preprocess,
 
         # Output cache file where MSBuild will write the contents of its build result caches at the
         # end of the build. If `-IsolateProjects` is not set, this sets it.
         [Alias("ORC")]
         [Parameter()]
-        [string]$OutputResultsCache,
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] })]
+        [object]$OutputResultsCache,
 
         # Profiles MSBuild evaluation and writes the result to the specified file. If the extension
         # of the specified file is '.md', the result is generated in Markdown format. Otherwise, a
@@ -139,41 +148,141 @@ function Invoke-DotnetMSBuild {
         [Parameter()]
         [string[]]$Target,
 
+        # Write the list of available targets to the specified file (or the output device, if no
+        # file is specified), without actually executing the build process.
+        [Alias("TS")]
+        [Parameter()]
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] })]
+        [object]$Targets,
+
+        # Specifies a custom toolset. A toolset consists of tasks, targets, and tools that are used
+        # to build an application.
+        [Alias("TV")]
+        [Parameter()]
+        [string]$ToolsVersion,
+
+        # Validate the project file and, if validation succeeds, build the project. If you don't
+        # specify schema, the project is validated against the default schema. If you specify a
+        # schema, the project is validated against the schema that you specify.
+        [Alias("Val")]
+        [Parameter()]
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] })]
+        [object]$Validate,
+
+        # Specifies the amount of information to display in the build log. Each logger displays
+        # events based on the verbosity level that you set for that logger. you can specify the
+        # following verbosity levels: `Q[uiet]`, `M[inimal]`, `N[ormal]` (default), `D[etailed]`,
+        # and `Diag[nostic]`.
+        [Alias("V")]
+        [Parameter()]
+        [string]$Verbosity,
+
+        # Display version information only. The project isn't built.
+        [Alias("Ver")]
+        [Parameter()]
+        [switch]$Version,
+
+        # List of warning codes to treats as errors. To treat all warnings as errors, use the
+        # parameters with `$true`. When a warning is treated as an error the target continues
+        # to execute as if it was a warning but the overall build fails.
+        [Parameter()]
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] -or $_ -is [string[]] })]
+        [object]$WarnAsError,
+
+        # List of warning codes that should not be promoted to errors. Specifically, if the
+        # `-WarnAsError` parameter is set to promote all warnings to errors, error codes specified
+        # with `-WarnNotAsError` are not promoted. This has no effect if `-WarnAsError` is not set
+        # to promote all warnings to errors.
+
+        [Parameter()]
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] -or $_ -is [string[]] })]
+        [object]$WarnNotAsError,
+
+        # List of warning codes to treats as low importance messages.
+        [Parameter()]
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] -or $_ -is [string[]] })]
+        [object]$WarnAsMessage,
+
+        # Serializes all build events to a compressed binary file. By default the file is in the
+        # current directory and named msbuild.binlog.
+        [Parameter()]
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] })]
+        [object]$BinaryLogger,
+
+        # The binary logger by default collects the source text of project files, including all
+        # imported projects and target files encountered during the build. The optional
+        # `-BinaryLoggerProjectImports` parameter controls this behavior. The default setting for
+        # `-BinaryLoggerProjectImports` is `Embed`.
+        [Alias("BL")]
+        [Parameter()]
+        [ValidateSet("Embed", "None", "ZipFile")]
+        [string]$BinaryLoggerProjectImports,
+
+        # Pass the parameters that you specify to the console logger, which displays build
+        # information in the console window.
+        [Alias("CLP")]
+        [Parameter()]
+        [hashtable]$ConsoleLoggerParameters,
+
         [Parameter(ValueFromRemainingArguments)]
         [string[]]$MSBuildArguments
     )
 
     $Arguments = @($ProjectFile)
 
-    if ($DetailedSummary) {
-        $Arguments += "-detailedSummary:True"
+    if ($DetailedSummary -is [bool]) {
+        if ($DetailedSummary) {
+            $Arguments += "-detailedSummary:True"
+        }
+        else {
+            $Arguments += "-detailedSummary:False"
+        }
     }
 
-    if ($GraphBuild) {
-        $Arguments += "-graphBuild:True"
+    if ($GraphBuild -is [bool]) {
+        if ($GraphBuild) {
+            $Arguments += "-graphBuild:True"
+        }
+        else {
+            $Arguments += "-graphBuild:False"
+        }
     }
 
     if ($IgnoreProjectExtensions.Count -gt 0) {
-        $Arguments += "-ignoreProjectExtensions:$([string]::Join(",", $IgnoreProjectExtensions))"
+        $Arguments += "-ignoreProjectExtensions:$([string]::Join(";", $IgnoreProjectExtensions))"
     }
 
     if ($InputResultsCaches.Count -gt 0) {
-        $Arguments += "-inputResultsCaches:$([string]::Join(",", $InputResultsCaches))"
+        # Must use semicolon separator
+        $Arguments += "-inputResultsCaches:$([string]::Join(";", $InputResultsCaches))"
     }
 
-    if ($Interactive) {
-        $Arguments += "-interactive:True"
+    if ($Interactive -is [bool]) {
+        if ($Interactive) {
+            $Arguments += "-interactive:True"
+        }
+        else {
+            $Arguments += "-interactive:False"
+        }
     }
 
     if ($IsolateProjects) {
         $Arguments += "-isolateProjects:$IsolateProjects"
     }
 
-    if ($LowPriority) {
-        $Arguments += "-lowPriority:True"
+    if ($LowPriority -is [bool]) {
+        if ($LowPriority) {
+            $Arguments += "-lowPriority:True"
+        }
+        else {
+            $Arguments += "-lowPriority:False"
+        }
     }
 
-    if ($MaxCpuCount) {
+    if ($MaxCpuCount -is [bool]) {
+        $Arguments += "-maxCpuCount"
+    }
+    elseif ($MaxCpuCount -is [int]) {
         $Arguments += "-maxCpuCount:$MaxCpuCount"
     }
 
@@ -181,19 +290,30 @@ function Invoke-DotnetMSBuild {
         $Arguments += "-noAutoResponse"
     }
 
-    if ($NodeReuse) {
-        $Arguments += "-nodeReuse:True"
+    if ($NodeReuse -is [bool]) {
+        if ($NodeReuse) {
+            $Arguments += "-nodeReuse:True"
+        }
+        else {
+            $Arguments += "-nodeReuse:False"
+        }
     }
 
     if ($NoLogo) {
         $Arguments += "-nologo"
     }
 
-    if ($Preprocess) {
+    if ($Preprocess -is [bool]) {
+        $Arguments += "-preprocess"
+    }
+    elseif ($Preprocess -is [string]) {
         $Arguments += "-preprocess:$Preprocess"
     }
 
-    if ($OutputResultsCache) {
+    if ($OutputResultsCache -is [bool]) {
+        $Arguments += "-outputResultsCache"
+    }
+    elseif ($OutputResultsCache -is [string]) {
         $Arguments += "-outputResultsCache:$OutputResultsCache"
     }
 
@@ -219,6 +339,90 @@ function Invoke-DotnetMSBuild {
 
     if ($Target) {
         $Arguments += "-target:$([string]::Join(",", $Target))"
+    }
+
+    if ($Targets -is [bool]) {
+        $Arguments += "-targets"
+    }
+    elseif ($Targets -is [string]) {
+        $Arguments += "-targets:$Targets"
+    }
+
+    if ($ToolsVersion) {
+        $Arguments += "-toolsVersion:$ToolsVersion"
+    }
+
+    if ($Validate -is [bool]) {
+        $Arguments += "-validate"
+    }
+    elseif ($Validate -is [string]) {
+        $Arguments += "-validate:$Validate"
+    }
+
+    if ($Verbosity) {
+        $Arguments += "-verbosity:$Verbosity"
+    }
+
+    if ($Version) {
+        $Arguments += "-version"
+    }
+
+    if ($WarnAsError -is [bool]) {
+        $Arguments += "-warnAsError"
+    }
+    elseif ($WarnAsError -is [string]) {
+        $Arguments += "-warnAsError:$WarnAsError"
+    }
+    elseif ($WarnAsError -is [string[]]) {
+        $Arguments += "-warnAsError:$([string]::Join(";", $WarnAsError))"
+    }
+
+    if ($WarnNotAsError -is [bool]) {
+        $Arguments += "-warnNotAsError"
+    }
+    elseif ($WarnNotAsError -is [string]) {
+        $Arguments += "-warnNotAsError:$WarnNotAsError"
+    }
+    elseif ($WarnNotAsError -is [array]) {
+        $Arguments += "-warnNotAsError:$([string]::Join(";", $WarnNotAsError))"
+    }
+
+    if ($WarnAsMessage -is [bool]) {
+        $Arguments += "-warnAsMessage"
+    }
+    elseif ($WarnAsMessage -is [string]) {
+        $Arguments += "-warnAsMessage:$WarnAsMessage"
+    }
+    elseif ($WarnAsMessage -is [string[]]) {
+        $Arguments += "-warnAsMessage:$([string]::Join(";", $WarnAsMessage))"
+    }
+
+    if ($null -ne $BinaryLogger) {
+        $argument = "-binaryLogger"
+        if ($BinaryLogger -is [string]) {
+            $argument += ":LogFile=$BinaryLogger"
+        }
+
+        if ($null -ne $BinaryLoggerProjectImports) {
+            $argument += ";ProjectImports=$BinaryLoggerProjectImports"
+        }
+
+        $Arguments += $argument
+    }
+
+    if ($ConsoleLoggerParameters -and $ConsoleLoggerParameters.Count -gt 0) {
+        $argument = "-consoleLoggerParameters:"
+        foreach ($parameter in ($ConsoleLoggerParameters.GetEnumerator() | Sort-Object Name)) {
+            if ($parameter.Value -is [bool] -and $parameter.Value -eq $true) {
+                $argument += "$($parameter.Name);"
+            }
+            else {
+                $argument += "$($parameter.Name)=$($parameter.Value);"
+            }
+        }
+
+        $argument = $argument.TrimEnd(";")
+        $Arguments += $argument
     }
 
     Invoke-Dotnet "msbuild" @Arguments @MSBuildArguments
