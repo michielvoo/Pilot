@@ -1,7 +1,7 @@
 # The error action is set to silently continue in these tests just to ensure the errors are not 
 # visible in the host when running these tests.
 
-Describe "`$Error automatic variable" {
+Describe "`$Error" {
     It "automatically collects a single error in a [System.Collections.ArrayList]" {
         # Arrange
         $global:Error.Clear()
@@ -90,7 +90,7 @@ Describe "`$Error automatic variable" {
         $global:Error[1] | Should -BeExact "test"
     }
 
-    Context "for native commands when redirecting stderr" {
+    Context "for native commands, when redirecting stderr" {
         # The redirection of the error stream in these tests is part of the preconditions for the 
         # first test to pass in Windows PowerShell's ConsoleHost. Without that redirection stderr 
         # output is not visible to (Windows) PowerShell itself.
@@ -100,7 +100,6 @@ Describe "`$Error automatic variable" {
                 # Arrange
                 $global:Error.Clear()
 
-
                 # Act
                 & find test 2>$null
 
@@ -109,15 +108,14 @@ Describe "`$Error automatic variable" {
                 $global:Error[0].Exception.Message | Should -Match "find:"
             }
         }
-        else {
+        elseif ($PSVersionTable.PSVersion -ge [System.Version]::new(7, 2)) {
             # Since PowerShell 7.2 the experimental feature PSNotApplyErrorActionToStderr has 
             # become a mainstream feature. This also affects collection of native command stderr 
             # in $Error.
             # See https://github.com/PowerShell/PowerShell/issues/3996#issuecomment-308242927
-            It "does not automatically collect errors in PowerShell" {
+            It "does not automatically collect errors in PowerShell 7.2 and later" {
                 # Arrange
                 $global:Error.Clear()
-
 
                 # Act
                 & find test 2>$null
