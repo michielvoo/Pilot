@@ -201,7 +201,7 @@ function Invoke-DotnetBuild {
     }
 
     if ($Properties) {
-        foreach ($property in $Properties.GetEnumerator()) {
+        foreach ($property in ($Properties.GetEnumerator() | Sort-Object Name)) {
             $Arguments += "--property:$($property.Name)=$($property.Value)"
         }
     }

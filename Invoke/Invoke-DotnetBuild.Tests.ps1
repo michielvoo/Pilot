@@ -23,8 +23,9 @@ Describe Invoke-DotnetBuild {
             OS = 4
             Output = 5
             Properties = @{
-                PropertyA = "A"
                 PropertyB = "B"
+                PropertyA = "A"
+                PropertyC = "C"
             }
             Runtime = 6
             SelfContained = $true
@@ -57,6 +58,7 @@ Describe Invoke-DotnetBuild {
                 "--output", 5
                 "--property:PropertyA=A"
                 "--property:PropertyB=B"
+                "--property:PropertyC=C"
                 "--runtime", 6
                 "--self-contained"
                 "--source", 7

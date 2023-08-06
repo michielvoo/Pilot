@@ -202,7 +202,7 @@ function Invoke-DotnetMSBuild {
     }
 
     if ($Properties) {
-        foreach ($property in $Properties.GetEnumerator()) {
+        foreach ($property in ($Properties.GetEnumerator() | Sort-Object Name)) {
             $Arguments += "-property:$($property.Name)=$($property.Value)"
         }
     }
@@ -212,7 +212,7 @@ function Invoke-DotnetMSBuild {
     }
 
     if ($RestoreProperties) {
-        foreach ($restoreProperty in $RestoreProperties.GetEnumerator()) {
+        foreach ($restoreProperty in ($RestoreProperties.GetEnumerator() | Sort-Object Name)) {
             $Arguments += "-restoreProperty:$($restoreProperty.Name)=$($restoreProperty.Value)"
         }
     }

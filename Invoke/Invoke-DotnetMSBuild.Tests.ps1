@@ -24,13 +24,15 @@ Describe Invoke-DotnetMSBuild {
             OutputResultsCache = 3
             ProfileEvaluation = 4
             Properties = @{
-                PropertyA = "A"
                 PropertyB = "B"
+                PropertyA = "A"
+                PropertyC = "C"
             }
             Restore = $true
             RestoreProperties = @{
-                PropertyC = "C"
+                PropertyE = "E"
                 PropertyD = "D"
+                PropertyF = "F"
             }
             Target = @("t1", "t2")
         }
@@ -58,9 +60,11 @@ Describe Invoke-DotnetMSBuild {
                 "-profileEvaluation:4"
                 "-property:PropertyA=A"
                 "-property:PropertyB=B"
+                "-property:PropertyC=C"
                 "-restore"
-                "-restoreProperty:PropertyC=C"
                 "-restoreProperty:PropertyD=D"
+                "-restoreProperty:PropertyE=E"
+                "-restoreProperty:PropertyF=F"
                 "-target:t1,t2"
                 "arg1"
                 "arg2"
