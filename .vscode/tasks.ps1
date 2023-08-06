@@ -13,6 +13,8 @@ switch ($Task) {
     }
 
     "Test" {
+        $configuration = New-PesterConfiguration
+
         $path = $Arguments[0]
         if ($null -eq $path) {
             Write-Warning "Test task requires a path"
@@ -21,19 +23,23 @@ switch ($Task) {
             Write-Warning "$path not found"
         }
         elseif ((Get-Item $path).PSIsContainer) {
-            Invoke-Pester $path
-        }
-        elseif ($path.EndsWith(".Tests.ps1")) {
-            Invoke-Pester $path
+            $configuration.Run.Path = $path
+            Invoke-Pester -Configuration $configuration
         }
         elseif (-not ($path.EndsWith(".ps1"))) {
             Write-Warning "Cannot test $(Split-Path $path -Leaf)"
         }
-        elseif (-not (Test-Path $path.Replace(".ps1", ".Tests.ps1"))) {
-            Write-Warning "$(Split-Path $path -Leaf) has no tests"
+        elseif ($path.EndsWith(".Tests.ps1") -or (Test-Path $path.Replace(".ps1", ".Tests.ps1"))) {
+            if (-not ($path.EndsWith(".Tests.ps1"))) {
+                $path = $path.Replace(".ps1", ".Tests.ps1")
+            }
+
+            $configuration.Output.Verbosity = "Detailed"
+            $configuration.Run.Path = $path
+            Invoke-Pester -Configuration $configuration
         }
         else {
-            Invoke-Pester $path.Replace(".ps1", ".Tests.ps1")
+            Write-Warning "$(Split-Path $path -Leaf) has no tests"
         }
     }
 
