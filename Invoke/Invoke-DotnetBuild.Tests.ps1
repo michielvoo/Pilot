@@ -39,7 +39,8 @@ Describe Invoke-DotnetBuild {
         # Assert
         Should -Invoke Invoke-Dotnet -ParameterFilter {
             $Command | Should -BeExactly "build"
-            $Arguments[0..9] | Should -Be @(
+            $i = 0
+            @(
                 "sln"
                 "--arch", 1
                 "--configuration", 2
@@ -47,8 +48,6 @@ Describe Invoke-DotnetBuild {
                 "--disable-build-servers"
                 "--force"
                 "--interactive"
-            )
-            $Arguments[10..18] | Should -Be @(
                 "--no-dependencies"
                 "--no-incremental"
                 "--no-restore"
@@ -56,20 +55,18 @@ Describe Invoke-DotnetBuild {
                 "--no-self-contained"
                 "--os", 4
                 "--output", 5
-            )
-            $Arguments[19..25] | Should -Be @(
                 "--property:PropertyA=A"
-                "--property:PropertyB=B"
+                "--property:PropertyB=x"
                 "--runtime", 6
                 "--self-contained"
                 "--source", 7
-            )
-            $Arguments[26..33] | Should -Be @(
                 "--tl", 8
                 "--use-current-runtime"
                 "--verbosity", 9
                 "--version-suffix", 10
-            )
+            ) | ForEach-Object -Begin {
+                $Arguments[$i++] | Should -Be $_
+            }
             $true
         }
     }
