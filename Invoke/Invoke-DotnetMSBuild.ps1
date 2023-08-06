@@ -58,6 +58,72 @@ function Invoke-DotnetMSBuild {
         [Parameter()]
         [string]$IsolateProjects,
 
+        # Causes MSBuild to run at low process priority.
+        [Parameter()]
+        [switch]$LowPriority,
+
+        # Specifies the maximum number of concurrent processes to use when building. If you don't
+        # include this switch, the default value is 1.
+        # TODO: If you include this switch without specifying a value, MSBuild will use up to the
+        # number of processors in the computer.
+        [Parameter()]
+        [int]$MaxCpuCount,
+
+        # Don't include any MSBuild.rsp or Directory.Build.rsp files automatically.
+        [Parameter()]
+        [switch]$NoAutoResponse,
+
+        # Enable or disable the re-use of MSBuild nodes. You can specify the following values:
+        # $true. Nodes remain after the build finishes so that subsequent builds can use them (default).
+        # $false. Nodes don't remain after the build completes.
+        # A node corresponds to a project that's executing. If you include the `-MaxCpuCount`
+        # switch, multiple nodes can execute concurrently.
+        [Parameter()]
+        [switch]$NodeReuse,
+
+        # Don't display the startup banner or the copyright message.
+        [Parameter()]
+        [switch]$NoLogo,
+
+        # Create a single, aggregated project file by inlining all the files that would be imported
+        # during a build, with their boundaries marked. You can use this switch to more easily
+        # determine which files are being imported, from where the files are being imported, and
+        # which files contribute to the build. When you use this switch, the project isn't built.
+        # If you specify a filepath, the aggregated project file is output to the file. Otherwise,
+        # the output appears in the console window.
+        [Parameter()]
+        [string]$Preprocess,
+
+        # Output cache file where MSBuild will write the contents of its build result caches at the
+        # end of the build. If `-IsolateProjects` is not set, this sets it.
+        [Parameter()]
+        [string]$OutputResultsCache,
+
+        # Profiles MSBuild evaluation and writes the result to the specified file. If the extension
+        # of the specified file is '.md', the result is generated in Markdown format. Otherwise, a
+        # tab-separated file is produced.
+        [Parameter()]
+        [string]$ProfileEvaluation,
+
+        # Set or override the specified project-level properties.
+        [Parameter()]
+        [hashtable]$Properties,
+
+        # Runs the `Restore` target prior to building the actual targets.
+        [Parameter()]
+        [switch]$Restore,
+
+        # Set or override these project-level properties only during restore and do not use
+        # properties specified with the `-Properties` parameter. 
+        [Parameter()]
+        [hashtable]$RestoreProperties,
+
+        # Build the specified targets in the project. If you specify any targets by using this
+        # parameter, they are run instead of any targets in the `DefaultTargets` attribute in the
+        # project file. 
+        [Parameter()]
+        [string[]]$Target,
+
         [Parameter(ValueFromRemainingArguments)]
         [string[]]$MSBuildArguments
     )
@@ -86,6 +152,58 @@ function Invoke-DotnetMSBuild {
 
     if ($IsolateProjects) {
         $Arguments += "-isolateProjects:$IsolateProjects"
+    }
+
+    if ($LowPriority) {
+        $Arguments += "-lowPriority:True"
+    }
+
+    if ($MaxCpuCount) {
+        $Arguments += "-maxCpuCount:$MaxCpuCount"
+    }
+
+    if ($NoAutoResponse) {
+        $Arguments += "-noAutoResponse"
+    }
+
+    if ($NodeReuse) {
+        $Arguments += "-nodeReuse:True"
+    }
+
+    if ($NoLogo) {
+        $Arguments += "-nologo"
+    }
+
+    if ($Preprocess) {
+        $Arguments += "-preprocess:$Preprocess"
+    }
+
+    if ($OutputResultsCache) {
+        $Arguments += "-outputResultsCache:$OutputResultsCache"
+    }
+
+    if ($ProfileEvaluation) {
+        $Arguments += "-profileEvaluation:$ProfileEvaluation"
+    }
+
+    if ($Properties) {
+        foreach ($property in $Properties.GetEnumerator()) {
+            $Arguments += "-property:$($property.Name)=$($property.Value)"
+        }
+    }
+
+    if ($Restore) {
+        $Arguments += "-restore"
+    }
+
+    if ($RestoreProperties) {
+        foreach ($restoreProperty in $RestoreProperties.GetEnumerator()) {
+            $Arguments += "-restoreProperty:$($restoreProperty.Name)=$($restoreProperty.Value)"
+        }
+    }
+
+    if ($Target) {
+        $Arguments += "-target:$([string]::Join(",", $Target))"
     }
 
     Invoke-Dotnet "msbuild" @Arguments @MSBuildArguments

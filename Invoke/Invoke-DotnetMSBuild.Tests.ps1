@@ -15,6 +15,24 @@ Describe Invoke-DotnetMSBuild {
             InputResultsCaches = "d","e","f"
             Interactive = $true
             IsolateProjects = "Message"
+            LowPriority = $true
+            MaxCpuCount = 1
+            NoAutoResponse = $true
+            NodeReuse = $true
+            NoLogo = $true
+            Preprocess = 2
+            OutputResultsCache = 3
+            ProfileEvaluation = 4
+            Properties = @{
+                PropertyA = "A"
+                PropertyB = "B"
+            }
+            Restore = $true
+            RestoreProperties = @{
+                PropertyC = "C"
+                PropertyD = "D"
+            }
+            Target = @("t1", "t2")
         }
         Invoke-DotnetMSBuild proj @parameters arg1 arg2
 
@@ -30,6 +48,20 @@ Describe Invoke-DotnetMSBuild {
                 "-inputResultsCaches:d,e,f"
                 "-interactive:True"
                 "-isolateProjects:Message"
+                "-lowPriority:True"
+                "-maxCpuCount:1"
+                "-noAutoResponse"
+                "-nodeReuse:True"
+                "-nologo"
+                "-preprocess:2"
+                "-outputResultsCache:3"
+                "-profileEvaluation:4"
+                "-property:PropertyA=A"
+                "-property:PropertyB=B"
+                "-restore"
+                "-restoreProperty:PropertyC=C"
+                "-restoreProperty:PropertyD=D"
+                "-target:t1,t2"
                 "arg1"
                 "arg2"
             ) | ForEach-Object {
