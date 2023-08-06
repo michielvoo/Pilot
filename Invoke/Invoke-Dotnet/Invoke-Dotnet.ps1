@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot "Invoke-NativeCommand.ps1")
+. (Join-Path $PSScriptRoot (Join-Path ".." "Invoke-NativeCommand.ps1"))
 
 # The generic driver for the .NET CLI.
 function Invoke-Dotnet {

@@ -1,6 +1,6 @@
 BeforeAll {
     . $PSCommandPath.Replace(".Tests.ps1", ".ps1")
-    . (Join-Path $PSScriptRoot "Invoke-NativeCommand.ps1")
+    . (Join-Path $PSScriptRoot (Join-Path ".." "Invoke-NativeCommand.ps1"))
 
     Mock Invoke-NativeCommand {}
 }
