@@ -22,7 +22,8 @@ Describe Invoke-DotnetClean {
         # Assert
         Should -Invoke Invoke-Dotnet -ParameterFilter {
             $Command | Should -BeExactly "build"
-            $Arguments | Should -Be @(
+            $i = 0
+            @(
                 "sln"
                 "--configuration", 1
                 "--framework", 2
@@ -31,7 +32,10 @@ Describe Invoke-DotnetClean {
                 "--output", 3
                 "--runtime", 4
                 "--verbosity", 5
-            )
+            ) | ForEach-Object {
+                $Arguments[$i++] | Should -BeExactly $_
+            }
+
             $true
         }
     }

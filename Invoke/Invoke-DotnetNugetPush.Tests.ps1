@@ -26,7 +26,8 @@ Describe Invoke-DotnetNugetPush {
         # Assert
         Should -Invoke Invoke-DotnetNuGet -ParameterFilter {
             $Command | Should -BeExactly "push"
-            $Arguments | Should -Be @(
+            $i = 0
+            @(
                 "pkg"
                 "--api-key", 1
                 "--disable-buffering"
@@ -39,7 +40,10 @@ Describe Invoke-DotnetNugetPush {
                 "--symbol-api-key", 3
                 "--symbol-source", 4
                 "--timeout", 5
-            )
+            ) | ForEach-Object {
+                $Arguments[$i++] | Should -BeExactly $_
+            }
+            
             $true
         }
     }

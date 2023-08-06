@@ -23,8 +23,8 @@ Describe Invoke-DotnetBuild {
             OS = 4
             Output = 5
             Properties = @{
-                PropertyA = "a"
-                PropertyB = "b"
+                PropertyA = "A"
+                PropertyB = "B"
             }
             Runtime = 6
             SelfContained = $true
@@ -56,7 +56,7 @@ Describe Invoke-DotnetBuild {
                 "--os", 4
                 "--output", 5
                 "--property:PropertyA=A"
-                "--property:PropertyB=x"
+                "--property:PropertyB=B"
                 "--runtime", 6
                 "--self-contained"
                 "--source", 7
@@ -65,7 +65,7 @@ Describe Invoke-DotnetBuild {
                 "--verbosity", 9
                 "--version-suffix", 10
             ) | ForEach-Object {
-                $Arguments[$i++] | Should -Be $_
+                $Arguments[$i++] | Should -BeExactly $_
             }
             $true
         }

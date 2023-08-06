@@ -21,7 +21,8 @@ Describe Invoke-DotnetMSBuild {
         # Assert
         Should -Invoke Invoke-Dotnet -ParameterFilter {
             $Command | Should -BeExactly "msbuild"
-            $Arguments | Should -Be @(
+            $i = 0
+            @(
                 "proj"
                 "-detailedSummary:True"
                 "-graphBuild:True"
@@ -31,7 +32,10 @@ Describe Invoke-DotnetMSBuild {
                 "-isolateProjects:Message"
                 "arg1"
                 "arg2"
-            )
+            ) | ForEach-Object {
+                $Arguments[$i++] | Should -BeExactly $_
+            }
+
             $true
         }
     }
