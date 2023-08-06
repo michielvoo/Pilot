@@ -64,7 +64,7 @@ Describe Invoke-DotnetBuild {
                 "--use-current-runtime"
                 "--verbosity", 9
                 "--version-suffix", 10
-            ) | ForEach-Object -Begin {
+            ) | ForEach-Object {
                 $Arguments[$i++] | Should -Be $_
             }
             $true
