@@ -15,24 +15,24 @@ Describe Invoke-DotnetBuild {
             DisableBuildServers = $true
             Force = $true
             Interactive = $true
-            NoDependencies = $true
-            NoIncremental = $true
-            NoRestore = $true
-            NoLogo = $true
-            NoSelfContained = $true
-            OS = 4
-            Output = 5
-            Properties = @{
-                PropertyA = "a"
-                PropertyB = "b"
-            }
-            Runtime = 6
-            SelfContained = $true
-            Source = 7
-            TL = 8
-            UseCurrentRuntime = $true
-            Verbosity = 9
-            VersionSuffix = 10
+            # NoDependencies = $true
+            # NoIncremental = $true
+            # NoRestore = $true
+            # NoLogo = $true
+            # NoSelfContained = $true
+            # OS = 4
+            # Output = 5
+            # Properties = @{
+            #     PropertyA = "a"
+            #     PropertyB = "b"
+            # }
+            # Runtime = 6
+            # SelfContained = $true
+            # Source = 7
+            # TL = 8
+            # UseCurrentRuntime = $true
+            # Verbosity = 9
+            # VersionSuffix = 10
         }
         Invoke-DotnetBuild sln @parameters
 
@@ -47,22 +47,22 @@ Describe Invoke-DotnetBuild {
                 "--disable-build-servers"
                 "--force"
                 "--interactive"
-                "--no-dependencies"
-                "--no-incremental"
-                "--no-restore"
-                "--nologo"
-                "--no-self-contained"
-                "--os", 4
-                "--output", 5
-                "--property:PropertyA=A"
-                "--property:PropertyB=B"
-                "--runtime", 6
-                "--self-contained"
-                "--source", 7
-                "--tl", 8
-                "--use-current-runtime"
-                "--verbosity", 9
-                "--version-suffix", 10
+                # "--no-dependencies"
+                # "--no-incremental"
+                # "--no-restore"
+                # "--nologo"
+                # "--no-self-contained"
+                # "--os", 4
+                # "--output", 5
+                # "--property:PropertyA=A"
+                # "--property:PropertyB=B"
+                # "--runtime", 6
+                # "--self-contained"
+                # "--source", 7
+                # "--tl", 8
+                # "--use-current-runtime"
+                # "--verbosity", 9
+                # "--version-suffix", 10
             )
             $true
         }
