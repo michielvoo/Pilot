@@ -14,7 +14,7 @@ function Invoke-DotnetPack {
         # The project or solution to pack. It's either a path to a csproj, vbproj, or fsproj file,
         # or to a solution file or directory. If not specified, the command searches the current
         # directory for a project or solution file.
-        [Parameter(Mandatory, Position = 0)]
+        [Parameter(Position = 0)]
         [string] $ProjectOrSolution,
 
         # Defines the build configuration. The default for most projects is Debug, but you can
@@ -94,7 +94,7 @@ function Invoke-DotnetPack {
         # the package version depends on the values of the `Version` and `VersionPrefix`
         # properties.
         # If you want to use `-VersionSuffix`, specify `VersionPrefix` and not `Version` in the
-        # project file. For example, if `VersionPrefix` is `0.1.2` and you pass `-VersionSuffix 
+        # project file. For example, if `VersionPrefix` is `0.1.2` and you pass `-VersionSuffix
         # rc.1` to `Invoke-DotnetPack`, the package version will be `0.1.2-rc.1`.
         # If `Version` has a value and you pass `-VersionSuffix` to `InvokeDotnetPack`, the value
         # specified for `-VersionSuffix` is ignored.
@@ -102,7 +102,9 @@ function Invoke-DotnetPack {
         [string]$VersionSuffix
     )
 
-    $Arguments = @($ProjectOrSolution)
+    if ($ProjectOrSolution) {
+        $Arguments = @($ProjectOrSolution)
+    }
 
     if ($Configuration) {
         $Arguments += "--configuration",$Configuration

@@ -11,8 +11,8 @@ function Invoke-DotnetPublish {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param (
-        # The project or solution to publish.
-        [Parameter(Mandatory, Position = 0)]
+        # The project or solution to publish. Defaults to the current directory.
+        [Parameter(Position = 0)]
         [string] $ProjectOrSolution,
 
         # Specifies the target architecture. This is a shorthand syntax for setting the Runtime
@@ -97,7 +97,7 @@ function Invoke-DotnetPublish {
         # Publishes the .NET runtime with your application so the runtime doesn't need to be
         # installed on the target machine. Default is `$true` if a runtime identifier is specified
         # and the project is an executable project (not a library project).
-        [Alias("SC")] 
+        [Alias("SC")]
         [Parameter()]
         [bool]$SelfContained,
 
@@ -124,7 +124,7 @@ function Invoke-DotnetPublish {
         [string]$Verbosity,
 
         # Sets the `RuntimeIdentifier` to a platform portable `RuntimeIdentifier` based on the one
-        # of your machine. This happens implicitly with properties that require a 
+        # of your machine. This happens implicitly with properties that require a
         #`RuntimeIdentifier`, such as `SelfContained`, `PublishAot`, `PublishSelfContained`,
         # `PublishSingleFile`, and `PublishReadyToRun`. If the property is set to `false`, that
         # implicit resolution will no longer occur.
@@ -138,7 +138,9 @@ function Invoke-DotnetPublish {
         [string]$VersionSuffix
     )
 
-    $Arguments = @($ProjectOrSolution)
+    if ($ProjectOrSolution) {
+        $Arguments = @($ProjectOrSolution)
+    }
 
     if ($Arch) {
         $Arguments += "--arch",$Arch

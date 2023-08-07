@@ -12,8 +12,10 @@ function Invoke-DotnetClean {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param (
-        # The MSBuild project or solution to clean.
-        [Parameter(Mandatory, Position = 0)]
+        # The MSBuild project or solution to clean. If a project or solution file is not specified,
+        # MSBuild searches the current working directory for a file that has a file extension that
+        # ends in proj or sln, and uses that file.
+        [Parameter(Position = 0)]
         [string] $ProjectOrSolution,
 
         # Defines the build configuration. The default for most projects is `Debug`, but you can
@@ -60,7 +62,9 @@ function Invoke-DotnetClean {
         [string]$Verbosity
     )
 
-    $Arguments = @($ProjectOrSolution)
+    if ($ProjectOrSolution) {
+        $Arguments = @($ProjectOrSolution)
+    }
 
     if ($Configuration) {
         $Arguments += "--configuration",$Configuration

@@ -8,8 +8,10 @@ function Invoke-DotnetBuild {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param (
-        # The project or solution file to build.
-        [Parameter(Mandatory, Position = 0)]
+        # The project or solution file to build. If a project or solution file isn't specified,
+        # MSBuild searches the current working directory for a file that has a file extension that
+        # ends in either proj or sln and uses that file.
+        [Parameter(Position = 0)]
         [string] $ProjectOrSolution,
 
         # Specifies the target architecture. This is a shorthand syntax for setting the Runtime
@@ -149,7 +151,9 @@ function Invoke-DotnetBuild {
         [string]$VersionSuffix
     )
 
-    $Arguments = @($ProjectOrSolution)
+    if ($ProjectOrSolution) {
+        $Arguments = @($ProjectOrSolution)
+    }
 
     if ($Arch) {
         $Arguments += "--arch",$Arch

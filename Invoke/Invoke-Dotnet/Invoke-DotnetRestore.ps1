@@ -111,7 +111,9 @@ function Invoke-DotnetRestore {
         [string]$Verbosity
     )
 
-    $Arguments = @($Root)
+    if ($Root) {
+        $Arguments = @($Root)
+    }
 
     if ($ConfigFile) {
         $Arguments += "--configfile",$ConfigFile
