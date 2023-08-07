@@ -30,85 +30,110 @@ function Invoke-DotnetPublish {
         [Parameter()]
         [string]$Configuration,
 
-        # 
+        # Forces the command to ignore any persistent build servers. This option provides a
+        # consistent way to disable all use of build caching, which forces a build from scratch.
+        # A build that doesn't rely on caches is useful when the caches might be corrupted or
+        # incorrect for some reason.
+        # Available since .NET 7 SDK.
         [Parameter()]
         [switch]$DisableBuildServers,
 
-        # 
+        # Publishes the application for the specified target framework. You must specify the target
+        # framework in the project file.
         [Alias("F")]
         [Parameter()]
         [string]$Framework,
 
-        # 
+        # Forces all dependencies to be resolved even if the last restore was successful.
+        # Specifying this flag is the same as deleting the project.assets.json file.
         [Parameter()]
         [switch]$Force,
 
-        # 
+        # Allows the command to stop and wait for user input or action. For example, to complete
+        # authentication.
+        # Available since .NET Core 3.0 SDK.
         [Parameter()]
         [switch]$Interactive,
 
-        # 
+        # Specifies one or several target manifests to use to trim the set of packages published
+        # with the app. The manifest file is part of the output of the dotnet store command.
+        [Parameter()]
+        [string[]]$Manifest,
+
+        # Doesn't build the project before publishing. It also implicitly sets the `-NoRestore`
+        # parameter.
+        [Parameter()]
+        [switch]$NoBuild,
+
+        # Ignores project-to-project references and only restores the root project.
         [Parameter()]
         [switch]$NoDependencies,
 
-        # 
-        [Parameter()]
-        [switch]$NoIncremental,
-
-        # 
-        [Parameter()]
-        [switch]$NoRestore,
-
-        # 
+        # Doesn't display the startup banner or the copyright message.
         [Parameter()]
         [switch]$NoLogo,
 
-        # 
+        # Doesn't execute an implicit restore when running the command.
         [Parameter()]
-        [switch]$NoSelfContained,
+        [switch]$NoRestore,
 
-        # 
+        # Specifies the path for the output directory. If not specified, it defaults to
+        # [project_file_folder]/bin/[configuration]/[framework]/publish/ for a
+        # framework-dependent executable and cross-platform binaries. It defaults to
+        # [project_file_folder]/bin/[configuration]/[framework]/[runtime]/publish/ for a
+        # self-contained executable.
         [Alias("O")]
         [Parameter()]
         [string]$Output,
 
-        # 
+        # Specifies the target operating system (OS). This is a shorthand syntax for setting the
+        # Runtime Identifier (RID), where the provided value is combined with the default RID. For
+        # example, on a `win-x64` machine, specifying `-OS linux` sets the RID to `linux-x64`. If
+        # you use this option, don't use the `-Runtime` option.
+        # Available since .NET 6.
         [Parameter()]
         [string]$OS,
 
-        # 
-        [Alias("P")]
+        # Publishes the .NET runtime with your application so the runtime doesn't need to be
+        # installed on the target machine. Default is `$true` if a runtime identifier is specified
+        # and the project is an executable project (not a library project).
+        [Alias("SC")] 
         [Parameter()]
-        [hashtable]$Properties,
+        [bool]$SelfContained,
 
-        # 
+        # Equivalent to `-SelfContained $false`.
+        [Parameter()]
+        [switch]$NoSelfContained,
+
+
+        # The URI of the NuGet package source to use during the restore operation.
+        [Parameter()]
+        [string]$Source,
+
+        # Publishes the application for a given runtime. For a list of Runtime Identifiers (RIDs),
+        # see the RID catalog. If you use this option, use `-SelfContained` or `-NoSelfContained`
+        # also.
         [Alias("R")]
         [Parameter()]
         [string]$Runtime,
 
-        # 
-        [Parameter()]
-        [bool]$SelfContained,
-
-        # 
-        [Parameter()]
-        [string]$Source,
-
-        # 
-        [Parameter()]
-        [string]$TL,
-
-        # 
+        # Sets the verbosity level of the command. Allowed values are `Q[uiet]`, `M[inimal]`,
+        # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Minimal`.
         [Alias("V")]
         [Parameter()]
         [string]$Verbosity,
 
-        # 
+        # Sets the `RuntimeIdentifier` to a platform portable `RuntimeIdentifier` based on the one
+        # of your machine. This happens implicitly with properties that require a 
+        #`RuntimeIdentifier`, such as `SelfContained`, `PublishAot`, `PublishSelfContained`,
+        # `PublishSingleFile`, and `PublishReadyToRun`. If the property is set to `false`, that
+        # implicit resolution will no longer occur.
         [Alias("UCR")]
         [Parameter()]
-        [boolean]$UseCurrentRuntime,
+        [bool]$UseCurrentRuntime,
 
-        # 
+        # Defines the version suffix to replace the asterisk (`*`) in the version field of the
+        # project file.
         [Parameter()]
         [string]$VersionSuffix
     )
@@ -139,24 +164,26 @@ function Invoke-DotnetPublish {
         $Arguments += "--interactive"
     }
 
+    if ($Manifest) {
+        foreach ($value in $Manifest) {
+            $Arguments += "--manifest", $value
+        }
+    }
+
+    if ($NoBuild) {
+        $Arguments += "--no-build"
+    }
+
     if ($NoDependencies) {
         $Arguments += "--no-dependencies"
-    }
-
-    if ($NoIncremental) {
-        $Arguments += "--no-incremental"
-    }
-
-    if ($NoRestore) {
-        $Arguments += "--no-restore"
     }
 
     if ($NoLogo) {
         $Arguments += "--nologo"
     }
 
-    if ($NoSelfContained) {
-        $Arguments += "--no-self-contained"
+    if ($NoRestore) {
+        $Arguments += "--no-restore"
     }
 
     if ($Output) {
@@ -165,16 +192,6 @@ function Invoke-DotnetPublish {
 
     if ($OS) {
         $Arguments += "--os",$OS
-    }
-
-    if ($Properties) {
-        foreach ($property in ($Properties.GetEnumerator() | Sort-Object Name)) {
-            $Arguments += "--property:$($property.Name)=$($property.Value)"
-        }
-    }
-
-    if ($Runtime) {
-        $Arguments += "--runtime",$Runtime
     }
 
     if ($null -ne $SelfContained) {
@@ -187,12 +204,16 @@ function Invoke-DotnetPublish {
         }
     }
 
+    if ($NoSelfContained) {
+        $Arguments += "--no-self-contained"
+    }
+
     if ($Source) {
         $Arguments += "--source",$Source
     }
 
-    if ($TL) {
-        $Arguments += "--tl",$TL
+    if ($Runtime) {
+        $Arguments += "--runtime",$Runtime
     }
 
     if ($Verbosity) {

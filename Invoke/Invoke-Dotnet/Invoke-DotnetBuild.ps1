@@ -140,7 +140,7 @@ function Invoke-DotnetBuild {
         # longer occur.
         [Alias("UCR")]
         [Parameter()]
-        [boolean]$UseCurrentRuntime,
+        [bool]$UseCurrentRuntime,
 
         # Sets the value of the `$(VersionSuffix)` property to use when building the project. This
         # only works if the `$(Version)` property isn't set. Then, `$(Version)` is set to the

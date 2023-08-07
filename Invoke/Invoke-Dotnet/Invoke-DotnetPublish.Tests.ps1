@@ -15,25 +15,20 @@ Describe Invoke-DotnetPublish {
             Framework = 3
             Force = $true
             Interactive = $true
+            Manifest = @("m1", "m2")
+            NoBuild = $true
             NoDependencies = $true
-            NoIncremental = $true
-            NoRestore = $true
             NoLogo = $true
-            NoSelfContained = $true
+            NoRestore = $true
             Output = 4
             OS = 5
-            Properties = @{
-                PropertyB = "B"
-                PropertyA = "A"
-                PropertyC = "C"
-            }
-            Runtime = 6
             SelfContained = $true
-            Source = 7
-            TL = 8
-            Verbosity = 9
+            NoSelfContained = $true
+            Source = 6
+            Runtime = 7
+            Verbosity = 8
             UseCurrentRuntime = $true
-            VersionSuffix = 10
+            VersionSuffix = 9
         }
         Invoke-DotnetPublish sln @parameters
 
@@ -49,23 +44,21 @@ Describe Invoke-DotnetPublish {
                 "--framework", 3
                 "--force"
                 "--interactive"
+                "--manifest", "m1"
+                "--manifest", "m2"
+                "--no-build"
                 "--no-dependencies"
-                "--no-incremental"
-                "--no-restore"
                 "--nologo"
-                "--no-self-contained"
+                "--no-restore"
                 "--output", 4
                 "--os", 5
-                "--property:PropertyA=A"
-                "--property:PropertyB=B"
-                "--property:PropertyC=C"
-                "--runtime", 6
                 "--self-contained", "true"
-                "--source", 7
-                "--tl", 8
-                "--verbosity", 9
+                "--no-self-contained"
+                "--source", 6
+                "--runtime", 7
+                "--verbosity", 8
                 "--use-current-runtime", "true"
-                "--version-suffix", 10
+                "--version-suffix", 9
             ) | ForEach-Object {
                 $Arguments[$i++] | Should -BeExactly $_
             }
