@@ -1,5 +1,7 @@
 . (Join-Path $PSScriptRoot "Invoke-DotnetNuget.ps1")
 
+# https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-nuget-push
+
 # .SYNOPSIS
 # Pushes a package to the server and publishes it.
 function Invoke-DotnetNugetPush {
