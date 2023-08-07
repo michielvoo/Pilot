@@ -21,97 +21,178 @@ function Invoke-DotnetTest {
         [Parameter(Position = 0)]
         [string] $ProjectSolutionDirectoryDllOrExe,
 
-        #
-        [Alias("A")]
+        # Path to a directory to be searched for additional test adapters. Only .dll files with
+        # suffix .TestAdapter.dll are inspected. If not specified, the directory of the test .dll
+        # is searched.
+        [Parameter()]
+        [string]$TestAdapterPath,
+
+        # Specifies the target architecture. This is a shorthand syntax for setting the Runtime
+        # Identifier (RID), where the provided value is combined with the default RID. For example,
+        # on a `win-x64` machine, specifying `-Arch x86` sets the RID to `win-x86`. If you use this
+        # option, don't use the `-Runtime` option.
+        # Available since .NET 6 Preview 7.
         [Parameter()]
         [string]$Arch,
 
-        #
+        # Runs the tests in blame mode. This option is helpful in isolating problematic tests that
+        # cause the test host to crash. When a crash is detected, it creates a sequence file in
+        # TestResults/<Guid>/<Guid>_Sequence.xml that captures the order of tests that were run
+        # before the crash. This option does not create a memory dump and is not helpful when the
+        # test is hanging.
+        [Parameter()]
+        [switch]$Blame,
+
+        # Runs the tests in blame mode and collects a crash dump when the test host exits
+        # unexpectedly. This option depends on the version of .NET used, the type of error, and the
+        # operating system.
+        # Available since .NET 5.0 SDK.
+        [Parameter()]
+        [switch]$BlameCrash,
+
+        # The type of crash dump to be collected. Supported dump types are `Full` (default), and
+        # `Mini`. Implies `-BlameCrash`.
+        # Available since .NET 5.0 SDK.
+        [Parameter()]
+        [string]$BlameCrashDumpType,
+
+        # Collects a crash dump on expected as well as unexpected test host exit.
+        # Available since .NET 5.0 SDK.
+        [Parameter()]
+        [switch]$BlameCrashCollectAlways,
+
+        # Run the tests in blame mode and collects a hang dump when a test exceeds the given timeout.
+        # Available since .NET 5.0 SDK.
+        [Parameter()]
+        [switch]$BlameHang,
+
+        # The type of crash dump to be collected. It should be `Full`, `Mini`, or `None`. When
+        # `None` is specified, test host is terminated on timeout, but no dump is collected.
+        # Implies `-BlameHang`.
+        # Available since .NET 5.0 SDK.
+        [Parameter()]
+        [string]$BlameHangDumpType,
+
+        # Per-test timeout, after which a hang dump is triggered and the test host process and all
+        # of its child processes are dumped and terminated. Implies `-Blame` and `-BlameHang`.
+        # Available since .NET 5.0 SDK.
+        [Parameter()]
+        [timespan]$BlameHangTimeout,
+
+        # Defines the build configuration. The default for most projects is Debug, but you can
+        # override the build configuration settings in your project.
         [Alias("C")]
         [Parameter()]
         [string]$Configuration,
 
-        # 
+        # Enables data collector for the test run. For example you can collect code coverage by
+        # using the `-Collect "Code Coverage"` option. 
         [Parameter()]
-        [switch]$DisableBuildServers,
+        [string]$Collect,
 
-        # 
+        # Enables diagnostic mode for the test platform and writes diagnostic messages to the
+        # specified file and to files next to it. The process that is logging the messages
+        # determines which files are created, such as *.host_<date>.txt for test host log, and
+        # *.datacollector_<date>.txt for data collector log.
+        [Alias("D")]
+        [Parameter()]
+        [string]$Diag,
+
+        # Sets the value of an environment variable. Creates the variable if it does not exist,
+        # overrides if it does exist. Use of this option will force the tests to be run in an
+        # isolated process. The option can be specified multiple times to provide multiple
+        # variables.
+        [Alias("E")]
+        [Parameter()]
+        [hashtable]$Environment,
+
+        # The target framework moniker (TFM) of the target framework to run tests for. The target
+        # framework must also be specified in the project file.
         [Alias("F")]
         [Parameter()]
         [string]$Framework,
 
-        # 
+        # Filters tests in the current project using the given expression. Only tests that match
+        # the filter expression are run.
         [Parameter()]
-        [switch]$Force,
+        [string]$Filter,
 
-        # 
+        # Allows the command to stop and wait for user input or action. For example, to complete
+        # authentication.
+        # Available since .NET Core 3.0 SDK.
         [Parameter()]
         [switch]$Interactive,
 
-        # 
+        # Specifies a logger for test results and optionally switches for the logger.
         [Parameter()]
-        [switch]$NoDependencies,
+        [hashtable[]]$Logger,
 
-        # 
+        # Doesn't build the test project before running it. It also implicitly sets the
+        # `-NoRestore` parameter.
         [Parameter()]
-        [switch]$NoIncremental,
+        [switch]$NoBuild,
 
-        # 
-        [Parameter()]
-        [switch]$NoRestore,
-
-        # 
+        # Run tests without displaying the Microsoft TestPlatform banner.
+        # Available since .NET Core 3.0 SDK.
         [Parameter()]
         [switch]$NoLogo,
 
-        # 
+        # Doesn't execute an implicit restore when running the command.
         [Parameter()]
-        [switch]$NoSelfContained,
+        [switch]$NoRestore,
 
-        # 
+        # Directory in which to find the binaries to run. If not specified, the default path is
+        # ./bin/<configuration>/<framework>/. For projects with multiple target frameworks (via the
+        # `TargetFrameworks` property), you also need to define `-Framework` when you specify this
+        # option. `Invoke-DotnetTest` always runs tests from the output directory.
         [Alias("O")]
         [Parameter()]
         [string]$Output,
 
-        # 
+        # Specifies the target operating system (OS). This is a shorthand syntax for setting the
+        # Runtime Identifier (RID), where the provided value is combined with the default RID. For
+        # example, on a `win-x64` machine, specifying `-OS linux` sets the RID to `linux-x64`. If
+        # you use this option, don't use the `-Runtime` option.
+        # Available since .NET 6.
         [Parameter()]
         [string]$OS,
 
-        # 
-        [Alias("P")]
+        # The directory where the test results are going to be placed. If the specified directory
+        # doesn't exist, it's created. The default is TestResults in the directory that contains
+        # the project file.
         [Parameter()]
-        [hashtable]$Properties,
+        [string]$ResultsDirectory,
 
-        # 
-        [Alias("R")]
+        # The target runtime to test for.
         [Parameter()]
         [string]$Runtime,
 
-        # 
+        # The `.runsettings` file to use for running the tests. The `TargetPlatform` element
+        # (x86|x64) has no effect for `Invoke-DotnetTest`. To run tests that target x86, install
+        # the x86 version of .NET Core. The bitness of the dotnet.exe that is on the path is what
+        # will be used for running tests.
+        [Alias("S")]
         [Parameter()]
-        [bool]$SelfContained,
+        [bool]$Settings,
 
-        # 
+        # List the discovered tests instead of running the tests.
+        [Alias("T")]
         [Parameter()]
-        [string]$Source,
+        [string]$ListTests,
 
-        # 
-        [Parameter()]
-        [string]$TL,
-
-        # 
+        # Sets the verbosity level of the command. Allowed values are `Q[uiet]`, `M[inimal]`,
+        # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Minimal`.
         [Alias("V")]
         [Parameter()]
         [string]$Verbosity,
 
-        # 
-        [Alias("UCR")]
+        # Specifies extra arguments to pass to the adapter.
         [Parameter()]
-        [bool]$UseCurrentRuntime,
+        [string[]]$XArgs,
 
-        # 
+        # Inline `RunSettings` arguments.
         [Parameter()]
-        [string]$VersionSuffix
+        [hashtable]$RunSettings
     )
 
     if ($ProjectSolutionDirectoryDllOrExe) {
