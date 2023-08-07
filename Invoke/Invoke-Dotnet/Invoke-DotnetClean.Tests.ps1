@@ -6,7 +6,7 @@ BeforeAll {
 }
 
 Describe Invoke-DotnetClean {
-    It "invokes dotnet with command clean and arguments" {
+    It "invokes Invoke-Dotnet with command clean and arguments" {
         # Act
         $parameters = @{
             Configuration = 1

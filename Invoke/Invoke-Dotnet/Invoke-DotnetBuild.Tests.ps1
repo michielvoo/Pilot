@@ -6,7 +6,7 @@ BeforeAll {
 }
 
 Describe Invoke-DotnetBuild {
-    It "invokes dotnet with command build and arguments" {
+    It "invokes Invoke-Dotnet with command build and arguments" {
         # Act
         $parameters = @{
             Arch = 1
