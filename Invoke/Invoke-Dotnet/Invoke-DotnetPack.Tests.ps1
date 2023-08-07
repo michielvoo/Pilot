@@ -19,6 +19,10 @@ Describe Invoke-DotnetPack {
             NoRestore = $true
             NoLogo = $true
             Output = 2
+            Properties = @{
+                PropertyA = "A"
+                PropertyB = "B"
+            }
             Runtime = 3
             Serviceable = $true
             Verbosity = 4
@@ -42,6 +46,8 @@ Describe Invoke-DotnetPack {
                 "--no-restore"
                 "--nologo"
                 "--output", 2
+                "-p:PropertyA=A"
+                "-p:PropertyB=B"
                 "--runtime", 3
                 "--serviceable"
                 "--verbosity", 4

@@ -67,6 +67,11 @@ function Invoke-DotnetPack {
         [Parameter()]
         [string]$Output,
 
+        # Sets one or more MSBuild properties.
+        [Alias("P")]
+        [Parameter()]
+        [hashtable]$Properties,
+
         # Specifies the target runtime to restore packages for. For a list of Runtime Identifiers
         # (RIDs), see the RID catalog.
         [Alias("R")]
@@ -137,6 +142,12 @@ function Invoke-DotnetPack {
 
     if ($Output) {
         $Arguments += "--output",$Output
+    }
+
+    if ($Properties) {
+        foreach ($property in ($Properties.GetEnumerator() | Sort-Object Name)) {
+            $Arguments += "-p:$($property.Name)=$($property.Value)"
+        }
     }
 
     if ($Runtime) {
