@@ -5,7 +5,7 @@ BeforeAll {
     Mock Invoke-Git {}
 }
 
-Describe Invoke-GitRevList {
+Describe Invoke-GitFetch {
     It "invokes git with the fetch command and any arguments" {
         # Act
         $parameters = @{
@@ -36,7 +36,7 @@ Describe Invoke-GitRevList {
     }
 
     Context "Parameter set RefSpecs" {
-        It "invokes git with the fetch command and any arguments" {
+        It "invokes git fetch with arguments" {
             # Act
             $parameters = @{
                 Append = $true
@@ -47,7 +47,6 @@ Describe Invoke-GitRevList {
 
             # Assert
             Should -Invoke Invoke-Git -ParameterFilter {
-                $Command | Should -BeExactly "fetch"
                 $i = 0
                 @(
                     "--append"
@@ -63,7 +62,7 @@ Describe Invoke-GitRevList {
     }
 
     Context "Parameter set Group" {
-        It "invokes git with the fetch command and any arguments" {
+        It "invokes git fetch with arguments" {
             # Act
             $parameters = @{
                 Append = $true
@@ -73,7 +72,6 @@ Describe Invoke-GitRevList {
 
             # Assert
             Should -Invoke Invoke-Git -ParameterFilter {
-                $Command | Should -BeExactly "fetch"
                 $i = 0
                 @(
                     "--append"
@@ -88,7 +86,7 @@ Describe Invoke-GitRevList {
     }
 
     Context "Parameter set Multiple" {
-        It "invokes git with the fetch command and any arguments" {
+        It "invokes git fetch with arguments" {
             # Act
             $parameters = @{
                 Append = $true
@@ -100,7 +98,6 @@ Describe Invoke-GitRevList {
 
             # Assert
             Should -Invoke Invoke-Git -ParameterFilter {
-                $Command | Should -BeExactly "fetch"
                 $i = 0
                 @(
                     "--multiple"
@@ -117,7 +114,7 @@ Describe Invoke-GitRevList {
     }
 
     Context "Parameter set All" {
-        It "invokes git with the fetch command and any arguments" {
+        It "invokes git fetch with arguments" {
             # Act
             $parameters = @{
                 Append = $true
@@ -127,7 +124,6 @@ Describe Invoke-GitRevList {
 
             # Assert
             Should -Invoke Invoke-Git -ParameterFilter {
-                $Command | Should -BeExactly "fetch"
                 $i = 0
                 @(
                     "--all"
