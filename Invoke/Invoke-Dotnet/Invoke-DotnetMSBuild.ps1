@@ -203,6 +203,27 @@ function Invoke-DotnetMSBuild {
         [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] -or $_ -is [string[]] })]
         [object]$WarnAsMessage,
 
+        # Serializes all build events to a compressed binary file. By default the file is in the
+        # current directory and named msbuild.binlog.
+        [Parameter()]
+        [ValidateScript({ ($_ -is [bool] -and $_ -eq $true) -or $_ -is [string] })]
+        [object]$BinaryLogger,
+
+        # The binary logger by default collects the source text of project files, including all
+        # imported projects and target files encountered during the build. The optional 
+        # `-BinaryLoggerProjectImports` parameter controls this behavior. The default setting for
+        # `-BinaryLoggerProjectImports` is `Embed`.
+        [Alias("BL")]
+        [Parameter()]
+        [ValidateSet("Embed", "None", "ZipFile")]
+        [string]$BinaryLoggerProjectImports,
+
+        # Pass the parameters that you specify to the console logger, which displays build
+        # information in the console window.
+        [Alias("CLP")]
+        [Parameter()]
+        [hashtable]$ConsoleLoggerParameters,
+
         [Parameter(ValueFromRemainingArguments)]
         [string[]]$MSBuildArguments
     )
@@ -374,6 +395,34 @@ function Invoke-DotnetMSBuild {
     }
     elseif ($WarnAsMessage -is [string[]]) {
         $Arguments += "-warnAsMessage:$([string]::Join(";", $WarnAsMessage))"
+    }
+
+    if ($null -ne $BinaryLogger) {
+        $argument = "-binaryLogger"
+        if ($BinaryLogger -is [string]) {
+            $argument += ":LogFile=$BinaryLogger"
+        }
+
+        if ($null -ne $BinaryLoggerProjectImports) {
+            $argument += ";ProjectImports=$BinaryLoggerProjectImports"
+        }
+
+        $Arguments += $argument
+    }
+
+    if ($ConsoleLoggerParameters -and $ConsoleLoggerParameters.Count -gt 0) {
+        $argument = "-consoleLoggerParameters:"
+        foreach ($parameter in ($ConsoleLoggerParameters.GetEnumerator() | Sort-Object Name)) {
+            if ($parameter.Value -is [bool] -and $parameter.Value -eq $true) {
+                $argument += "$($parameter.Name);"
+            }
+            else {
+                $argument += "$($parameter.Name)=$($parameter.Value);"
+            }
+        }
+
+        $argument = $argument.TrimEnd(";")
+        $Arguments += $argument
     }
 
     Invoke-Dotnet "msbuild" @Arguments @MSBuildArguments

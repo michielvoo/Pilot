@@ -43,6 +43,13 @@ Describe Invoke-DotnetMSBuild {
             WarnAsError = "8"
             WarnNotAsError = "9", "10"
             WarnAsMessage = "11"
+            BinaryLogger = "12"
+            BinaryLoggerProjectImports = "None"
+            ConsoleLoggerParameters = @{
+                Summary = $true
+                ErrorsOnly = $true
+                Verbosity = "Minimal"
+            }
         }
         Invoke-DotnetMSBuild proj @parameters arg1 arg2
 
@@ -82,6 +89,8 @@ Describe Invoke-DotnetMSBuild {
                 "-warnAsError:8"
                 "-warnNotAsError:9;10"
                 "-warnAsMessage:11"
+                "-binaryLogger:LogFile=12;ProjectImports=None"
+                "-consoleLoggerParameters:ErrorsOnly;Summary;Verbosity=Minimal"
                 "arg1"
                 "arg2"
             ) | ForEach-Object {
