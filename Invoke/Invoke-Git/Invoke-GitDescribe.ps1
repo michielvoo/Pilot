@@ -42,7 +42,7 @@ function Invoke-GitDescribe {
         [ParameterSetName("Dirty")]
         [switch]$All,
 
-        # Instead of using only the annotated tags, use any tag found in `refs/tags` namespace. 
+        # Instead of using only the annotated tags, use any tag found in `refs/tags` namespace.
         # This option enables matching a lightweight (non-annotated) tag.
         [Parameter()]
         [ParameterSetName("Commitish")]
@@ -72,7 +72,7 @@ function Invoke-GitDescribe {
         [Parameter()]
         [int]$Candidates,
 
-        # Only output exact matches (a tag directly references the supplied commit). This is a 
+        # Only output exact matches (a tag directly references the supplied commit). This is a
         # synonym for `-Candidates 0`.
         [Parameter()]
         [switch]$ExactMatch,
