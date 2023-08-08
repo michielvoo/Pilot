@@ -6,6 +6,35 @@ BeforeAll {
 }
 
 Describe Invoke-GitRevList {
+    It "invokes git with the fetch command and any arguments" {
+        # Act
+        $parameters = @{
+            Append = $true
+            Atomic = $true
+            Depth = 1
+            # ...
+            Quiet = $true
+        }
+        Invoke-GitFetch @parameters
+
+        # Assert
+        Should -Invoke Invoke-Git -ParameterFilter {
+            $Command | Should -BeExactly "fetch"
+            $i = 0
+            @(
+                "--append"
+                "--atomic"
+                "--depth=1"
+                # ...
+                "--quiet"
+            ) | ForEach-Object {
+                $Arguments[$i++] | Should -BeExactly $_
+            }
+
+            $true
+        }
+    }
+
     Context "Parameter set RefSpecs" {
         It "invokes git with the fetch command and any arguments" {
             # Act

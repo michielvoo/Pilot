@@ -27,7 +27,8 @@ function Invoke-GitFetch {
         [Parameter(ParameterSetName = "Group")]
         [string]$Group,
 
-        # Allow several <repository> and <group> arguments to be specified. No <refspec>s may be specified.
+        # Allow `-Repositories` and `-Groups` parameters to be specified. No `-Refspecs` may be
+        # specified.
         [Parameter(Mandatory, ParameterSetName = "Multiple")]
         [switch]$Multiple,
 
@@ -49,7 +50,32 @@ function Invoke-GitFetch {
         # `.git/FETCH_HEAD`. Without this option old data in `.git/FETCH_HEAD` will be overwritten.
         [Alias("A")]
         [Parameter()]
-        [switch]$Append
+        [switch]$Append,
+
+        # Use an atomic transaction to update local refs. Either all refs are updated, or on error,
+        # no refs are updated.
+        [Parameter()]
+        [switch]$Atomic,
+
+        # Limit fetching to the specified number of commits from the tip of each remote branch
+        # history. If fetching to a shallow repository created by `Invoke-GitClone with the `-Depth`
+        # parameter, deepen or shorten the history to the specified number of commits. Tags for the
+        # deepened commits are not fetched.
+        [Parameter()]
+        [int]$Depth,
+
+        # Similar to `-Depth`, except it specifies the number of commits from the current shallow
+        # boundary instead of from the tip of each remote branch history.
+        [Parameter()]
+        [int]$Deepen,
+
+        # ...
+
+        # Pass `-Quiet` to git-fetch-pack and silence any other internally used git commands.
+        # Progress is not reported to the standard error stream.
+        [Alias("Q")]
+        [Parameter()]
+        [switch]$Quiet
     )
 
     $Arguments = @()
@@ -70,6 +96,24 @@ function Invoke-GitFetch {
 
     if ($Append) {
         $Arguments += "--append"
+    }
+
+    if ($Atomic) {
+        $Arguments += "--atomic"
+    }
+
+    if ($Depth) {
+        $Arguments += "--depth=$Depth"
+    }
+
+    if ($Deepen) {
+        $Arguments += "--deepen=$Deepen"
+    }
+
+    # ...
+
+    if ($Quiet) {
+        $Arguments += "--quiet"
     }
 
     # Parameter set RefSpecs
