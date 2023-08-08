@@ -81,7 +81,7 @@ function Invoke-GitRevParse {
 
         # Usually the output is made one line per flag and parameter. This option makes output a
         # single line, properly quoted for consumption by shell. Useful when you expect your
-        # parameter to contain whitespaces and newlines (e.g. when using pickaxe `-S` with 
+        # parameter to contain whitespaces and newlines (e.g. when using pickaxe `-S` with
         # `git diff-*`). In contrast to the `-SqQuote` parameter, the command input is still
         # interpreted as usual.
         [Parameter()]

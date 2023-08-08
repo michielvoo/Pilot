@@ -210,7 +210,7 @@ function Invoke-DotnetMSBuild {
         [object]$BinaryLogger,
 
         # The binary logger by default collects the source text of project files, including all
-        # imported projects and target files encountered during the build. The optional 
+        # imported projects and target files encountered during the build. The optional
         # `-BinaryLoggerProjectImports` parameter controls this behavior. The default setting for
         # `-BinaryLoggerProjectImports` is `Embed`.
         [Alias("BL")]

@@ -12,7 +12,7 @@ function Invoke-GitRevList {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param (
-        # 
+        # Commits to start from.
         [Parameter(Mandatory, Position = 0)]
         [string[]]$Commits,
 
