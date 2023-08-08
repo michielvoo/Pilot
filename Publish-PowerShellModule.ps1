@@ -5,14 +5,17 @@ Function Publish-PowerShellModule
         [string]$Name = (Split-Path $Pwd -Leaf),
         [Parameter()]
         [string]$Ref = (&{
-            $Tag = git describe --tags --exact-match --match "v*.*.*" HEAD 2> $null
-            If ($LastExitCode -eq 0)
+            $describeResult = Invoke-GitDescribe -Tags -ExactMatch -Match "v*.*.*" HEAD
+            If ($describeResult.ExitCode -eq 0)
             {
-                Return $Tag
+                Return $describeResult.Stdout[0]
             }
             Else
             {
-                Return (git rev-parse --abbrev-ref HEAD 2> $null)
+                $revParseResult = Invoke-GitRevParse -ParseOpt -AbbrevRef HEAD
+                if ($revParseResult.ExitCode -eq 0) {
+                    Return $revParseResult.Stdout[0]
+                }
             }
         }),
         [Parameter()]
@@ -144,6 +147,7 @@ Function Publish-PowerShellModule
         [Version] $version = $manifest.Version
         If ($version)
         {
+            $revListResult = Invoke-GitRevList -Count HEAD
             If ($Ref -match "^v\d+\.\d+\.\d+$")
             {
                 If ("v$($version.Major).$($version.Minor).$($version.Build)" -ne $Ref)
@@ -151,7 +155,7 @@ Function Publish-PowerShellModule
                     $errors += "Version in manifest ($version) does not match tag ($Ref)"
                 }
             }
-            ElseIf ((git rev-list --count HEAD) -gt 1)
+            ElseIf ($revListResult.Stdout[0] -gt 1)
             {
                 If ($Ref -eq $Main)
                 {
@@ -160,7 +164,7 @@ Function Publish-PowerShellModule
                 Else
                 {
                     $revision = $Main
-                    git fetch origin "${Main}:$Main" --depth=1 --quiet
+                    Invoke-GitFetch -Depth 1 -Quiet origin "${Main}:$Main"
 
                     $topic = $Ref -replace "[^a-zA-Z0-9]",""
                     $prerelease = $topic + ("{0:000000}" -f $Build)
