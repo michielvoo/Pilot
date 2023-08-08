@@ -15,7 +15,6 @@ function Invoke-DotnetToolRun {
         [Parameter(Mandatory, Position = 0)]
         [string]$CommandName,
 
-        # 
         [Parameter(ValueFromRemainingArguments)]
         [string[]]$ToolArguments
     )
