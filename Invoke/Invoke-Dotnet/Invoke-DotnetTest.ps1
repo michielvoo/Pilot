@@ -86,7 +86,7 @@ function Invoke-DotnetTest {
         [string]$Configuration,
 
         # Enables data collector for the test run. For example you can collect code coverage by
-        # using the `-Collect "Code Coverage"` option. 
+        # using the `-Collect "Code Coverage"` option.
         [Parameter()]
         [string]$Collect,
 
@@ -98,7 +98,7 @@ function Invoke-DotnetTest {
         [Parameter()]
         [string]$Diag,
 
-        # Sets the value of an environment variable. Creates the variable if it does not exist,
+        # Sets the value of environment variables. Creates the variable if it does not exist,
         # overrides if it does exist. Use of this option will force the tests to be run in an
         # isolated process. The option can be specified multiple times to provide multiple
         # variables.
@@ -123,9 +123,9 @@ function Invoke-DotnetTest {
         [Parameter()]
         [switch]$Interactive,
 
-        # Specifies a logger for test results and optionally switches for the logger.
+        # Specifies loggers for test results and optionally switches for each logger.
         [Parameter()]
-        [hashtable[]]$Logger,
+        [hashtable]$Loggers,
 
         # Doesn't build the test project before running it. It also implicitly sets the
         # `-NoRestore` parameter.
@@ -173,12 +173,12 @@ function Invoke-DotnetTest {
         # will be used for running tests.
         [Alias("S")]
         [Parameter()]
-        [bool]$Settings,
+        [string]$Settings,
 
         # List the discovered tests instead of running the tests.
         [Alias("T")]
         [Parameter()]
-        [string]$ListTests,
+        [switch]$ListTests,
 
         # Sets the verbosity level of the command. Allowed values are `Q[uiet]`, `M[inimal]`,
         # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Minimal`.
@@ -186,61 +186,110 @@ function Invoke-DotnetTest {
         [Parameter()]
         [string]$Verbosity,
 
-        # Specifies extra arguments to pass to the adapter.
-        [Parameter()]
-        [string[]]$XArgs,
-
         # Inline `RunSettings` arguments.
         [Parameter()]
-        [hashtable]$RunSettings
+        [hashtable]$RunSettings,
+
+        # Specifies extra arguments to pass to the adapter.
+        [Parameter(ValueFromRemainingArguments)]
+        [string[]]$XArgs
     )
 
     if ($ProjectSolutionDirectoryDllOrExe) {
         $Arguments = @($ProjectSolutionDirectoryDllOrExe)
     }
 
+    if ($TestAdapterPath) {
+        $Arguments += "--test-adapter-path",$TestAdapterPath
+    }
+
     if ($Arch) {
         $Arguments += "--arch",$Arch
+    }
+
+    if ($Blame) {
+        $Arguments += "--blame"
+    }
+
+    if ($BlameCrash) {
+        $Arguments += "--blame-crash"
+    }
+
+    if ($BlameCrashDumpType) {
+        $Arguments += "--blame-crash-dump-type",$BlameCrashDumpType
+    }
+
+    if ($BlameCrashCollectAlways) {
+        $Arguments += "--blame-crash-collect-always"
+    }
+
+    if ($BlameHang) {
+        $Arguments += "--blame-hang"
+    }
+
+    if ($BlameHangDumpType) {
+        $Arguments += "--blame-hang-dump-type",$BlameHangDumpType
+    }
+
+    if ($BlameHangTimeout) {
+        $Arguments += "--blame-hang-timeout","$($BlameHangTimeout.TotalMilliseconds)ms"
     }
 
     if ($Configuration) {
         $Arguments += "--configuration",$Configuration
     }
 
-    if ($DisableBuildServers) {
-        $Arguments += "--disable-build-servers"
+    if ($Collect) {
+        $Arguments += "--collect",$Collect
+    }
+
+    if ($Diag) {
+        $Arguments += "--diag",$Diag
+    }
+
+    if ($Environment) {
+        foreach ($variable in ($Environment.GetEnumerator() | Sort-Object Name)) {
+            $Arguments += "--environment","$($variable.Name)=$($variable.Value)"
+        }
     }
 
     if ($Framework) {
         $Arguments += "--framework",$Framework
     }
 
-    if ($Force) {
-        $Arguments += "--force"
+    if ($Filter) {
+        $Arguments += "--filter",$Filter
     }
 
     if ($Interactive) {
         $Arguments += "--interactive"
     }
 
-    if ($NoDependencies) {
-        $Arguments += "--no-dependencies"
+    if ($Loggers) {
+        foreach ($logger in ($Loggers.GetEnumerator() | Sort-Object Name)) {
+            $argument = $logger.Name
+
+            if ($logger.Value -is [hashtable]) {
+                foreach ($arg in ($logger.Value.GetEnumerator() | Sort-Object Name)) {
+                    $argument += ";$($arg.Name)=$($arg.Value)"
+                }
+            }
+
+            $Arguments += "--logger",$argument
+
+        }
     }
 
-    if ($NoIncremental) {
-        $Arguments += "--no-incremental"
-    }
-
-    if ($NoRestore) {
-        $Arguments += "--no-restore"
+    if ($NoBuild) {
+        $Arguments += "--no-build"
     }
 
     if ($NoLogo) {
         $Arguments += "--nologo"
     }
 
-    if ($NoSelfContained) {
-        $Arguments += "--no-self-contained"
+    if ($NoRestore) {
+        $Arguments += "--no-restore"
     }
 
     if ($Output) {
@@ -251,50 +300,36 @@ function Invoke-DotnetTest {
         $Arguments += "--os",$OS
     }
 
-    if ($Properties) {
-        foreach ($property in ($Properties.GetEnumerator() | Sort-Object Name)) {
-            $Arguments += "--property:$($property.Name)=$($property.Value)"
-        }
+    if ($ResultsDirectory) {
+        $Arguments += "--results-directory",$ResultsDirectory
     }
 
     if ($Runtime) {
         $Arguments += "--runtime",$Runtime
     }
 
-    if ($null -ne $SelfContained) {
-        $Arguments += "--self-contained"
-        if ($SelfContained) {
-            $Arguments += "true"
-        }
-        else {
-            $Arguments += "false"
-        }
+    if ($Settings) {
+        $Arguments += "--settings",$Settings
     }
 
-    if ($Source) {
-        $Arguments += "--source",$Source
-    }
-
-    if ($TL) {
-        $Arguments += "--tl",$TL
+    if ($ListTests) {
+        $Arguments += "--list-tests"
     }
 
     if ($Verbosity) {
         $Arguments += "--verbosity",$Verbosity
     }
 
-    if ($null -ne $UseCurrentRuntime) {
-        $Arguments += "--use-current-runtime"
-        if ($UseCurrentRuntime) {
-            $Arguments += "true"
-        }
-        else {
-            $Arguments += "false"
-        }
+    foreach ($arg in $XArgs) {
+        $Arguments += $arg
     }
 
-    if ($VersionSuffix) {
-        $Arguments += "--version-suffix",$VersionSuffix
+    if ($RunSettings) {
+        $Arguments += "--"
+
+        foreach ($runSetting in ($RunSettings.GetEnumerator() | Sort-Object Name)) {
+            $Arguments += "$($runSetting.Name)=$($runSetting.Value)"
+        }
     }
 
     Invoke-Dotnet "test" @Arguments
