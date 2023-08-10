@@ -9,32 +9,13 @@
 # native command they use internally and flags and parameters for the other native commands they
 # use downstream of `git rev-list`. This cmdlet is used to distinguish between them.
 function Invoke-GitRevParse {
-    [CmdletBinding(DefaultParameterSetName = "ParseOpt")]
+    [CmdletBinding()]
     [OutputType([hashtable])]
     param (
-        # Use `Invoke-GitRevParse` in option parsing mode.
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "ParseOpt")]
-        [switch]$ParseOpt,
-
         # Use `Invoke-GitRevParse` in shell quoting mode. In contrast to the `-SQ parameter, this
         # mode does only quoting. Nothing else is done to command input.
-        [Parameter(Mandatory, Position = 0, ParameterSetName = "SqQuote")]
+        [Parameter(Position = 0, ParameterSetName = "SqQuote")]
         [switch]$SqQuote,
-
-        # ParseOpt
-
-        # Tells the option parser to echo out the first `--` met instead of skipping it.
-        [Parameter(ParameterSetName = "ParseOpt")]
-        [switch]$KeepDashDash,
-
-        # Lets the option parser stop at the first non-option argument. This can be used to parse
-        # sub-commands that take options themselves.
-        [Parameter(ParameterSetName = "ParseOpt")]
-        [switch]$StopAtNonOption,
-
-        # Output the options in their long form if available, and with their arguments stuck.
-        [Parameter(ParameterSetName = "ParseOpt")]
-        [switch]$StuckLong,
 
         # Filtering
 
@@ -129,25 +110,8 @@ function Invoke-GitRevParse {
 
     $Arguments = @()
 
-    if ($ParseOpt) {
-        $Arguments += "--parse-opt"
-    }
-    elseif ($SqQuote) {
+    if ($SqQuote) {
         $Arguments += "--sq-quote"
-    }
-
-    # Options for --parseopt
-
-    if ($KeepDashDash) {
-        $Arguments += "--keep-dash-dash"
-    }
-
-    if ($StopAtNonOption) {
-        $Arguments += "--stop-at-non-option"
-    }
-
-    if ($StuckLong) {
-        $Arguments += "--stuck-long"
     }
 
     # Options for Filtering
