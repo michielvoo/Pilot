@@ -1,5 +1,3 @@
-$tagRegex = "v\d+\.\d+\.\d+"
-
 Function Publish-PowerShellModule
 {
     [CmdletBinding()]
@@ -7,17 +5,7 @@ Function Publish-PowerShellModule
         [Parameter()]
         [string]$Name = (Split-Path $Pwd -Leaf),
         [Parameter()]
-        [string]$Ref = (&{
-            $tag = Get-MatchingTagForGitHeadCommit($tagRegex)
-            if ($tag)
-            {
-                return $tag
-            }
-            else
-            {
-                return GetCurrentGitBranch
-            }
-        }),
+        [string]$Ref = (&{Get-CurrentGitVersionTagOrBranch}),
         [Parameter()]
         [string]$Main = "main",
         [Parameter()]
@@ -253,41 +241,3 @@ Function Publish-PowerShellModule
         }
     }
 }
-
-# Extracted functions
-# TODO: further refactor and move functions/cmdlets and tests to separate files
-
-function Get-MatchingTagForGitHeadCommit([string]$Regex) {
-    $parameters = @{
-        Commitish = "HEAD"
-        ExactMatch = $true # only tags that directly reference the commit
-        Tags = $true # allow unannotated (lightweight) tags
-    }
-    $result = Invoke-GitDescribe @parameters
-
-    If ($result.ExitCode -ne 0) {
-        return
-    }
-    
-    $tag = $result.Stdout[0]
-
-    if ($regex -and $tag -cmatch $regex) {
-        return $tag
-    }
-}
-
-function GetCurrentGitBranch() {
-    $parameters = @{
-        ShowCurrent = $true # only print the current branch or nothing if in detached head state
-    }
-    $result = Invoke-GitBranchList @parameters
-
-    if ($result.ExitCode -ne 0) {
-        return
-    }
-
-    if ($result.Stdout.Count -eq 1) {
-        return $result.Stdout[0]
-    }
-}
-
