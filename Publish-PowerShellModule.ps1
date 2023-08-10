@@ -15,10 +15,7 @@ Function Publish-PowerShellModule
             }
             else
             {
-                $revParseResult = Invoke-GitRevParse -ParseOpt -AbbrevRef HEAD
-                if ($revParseResult.ExitCode -eq 0) {
-                    Return $revParseResult.Stdout[0]
-                }
+                return GetCurrentGitBranch
             }
         }),
         [Parameter()]
@@ -262,13 +259,13 @@ Function Publish-PowerShellModule
 
 function Get-MatchingTagForGitHeadCommit([string]$Regex) {
     $parameters = @{
+        Commitish = "HEAD"
         ExactMatch = $true # only tags that directly reference the commit
         Tags = $true # allow unannotated (lightweight) tags
     }
-    $result = Invoke-GitDescribe HEAD @parameters
+    $result = Invoke-GitDescribe @parameters
 
-    If ($result.ExitCode -ne 0)
-    {
+    If ($result.ExitCode -ne 0) {
         return
     }
     
@@ -276,6 +273,21 @@ function Get-MatchingTagForGitHeadCommit([string]$Regex) {
 
     if ($regex -and $tag -cmatch $regex) {
         return $tag
+    }
+}
+
+function GetCurrentGitBranch() {
+    $parameters = @{
+        ShowCurrent = $true # only print the current branch or nothing if in detached head state
+    }
+    $result = Invoke-GitBranchList @parameters
+
+    if ($result.ExitCode -ne 0) {
+        return
+    }
+
+    if ($result.Stdout.Count -eq 1) {
+        return $result.Stdout[0]
     }
 }
 
