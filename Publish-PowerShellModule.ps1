@@ -1,29 +1,29 @@
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Analyze-Scripts.ps1"))
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Get-CurrentGitVersionTagOrBranch.ps1"))
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Get-ModuleManifest.ps1"))
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Get-UnixTimestamp.ps1"))
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Get-Version.ps1"))
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Invoke-Tests.ps1"))
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "New-ArtifactsDirectory.ps1"))
+
 Function Publish-PowerShellModule
 {
+    [CmdletBinding()]
     Param (
+        # The name of the PowerShell module (set to the name of the current directory by default).
         [Parameter()]
-        [string]$Name = (Split-Path $Pwd -Leaf),
+        [string]$ModuleName = (Split-Path $PWD -Leaf),
         [Parameter()]
-        [string]$Ref = (&{
-            $describeResult = Invoke-GitDescribe -Tags -ExactMatch -Match "v*.*.*" HEAD
-            If ($describeResult.ExitCode -eq 0)
-            {
-                Return $describeResult.Stdout[0]
-            }
-            Else
-            {
-                $revParseResult = Invoke-GitRevParse -ParseOpt -AbbrevRef HEAD
-                if ($revParseResult.ExitCode -eq 0) {
-                    Return $revParseResult.Stdout[0]
-                }
-            }
-        }),
+        [string]$Ref = (&{Get-CurrentGitVersionTagOrBranch}),
+        # The name of the main Git branch.
         [Parameter()]
         [string]$Main = "main",
+        # The build number (set to the UNIX timestamp by default).
         [Parameter()]
-        [int]$Build = ([int][Math]::Ceiling([double]::Parse((Get-Date -UFormat %s), [CultureInfo]::CurrentCulture))),
+        [int]$Build = (&{Get-UnixTimestamp}),
+        # Directory for the test and coverage reports, and the module itself (set to artifacts by default).
         [Parameter()]
-        [string]$ArtifactsPath = (Join-Path $Pwd "artifacts"),
+        [string]$ArtifactsPath = (Join-Path $PWD "artifacts"),
         [Parameter()]
         [string]$NuGetApiKey,
         [Parameter()]
@@ -140,120 +140,52 @@ Function Publish-PowerShellModule
         }
 
         # Adjust manifest path
-        $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
+        $resolvedManifestPath = Resolve-Path -Path $manifest.Path -Relative
         $manifestPath = Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
 
-        # Versioning
-        [Version] $version = $manifest.Version
-        If ($version)
-        {
-            $revListResult = Invoke-GitRevList -Count HEAD
-            If ($Ref -match "^v\d+\.\d+\.\d+$")
-            {
-                If ("v$($version.Major).$($version.Minor).$($version.Build)" -ne $Ref)
-                {
-                    $errors += "Version in manifest ($version) does not match tag ($Ref)"
-                }
-            }
-            ElseIf ($revListResult.Stdout[0] -gt 1)
-            {
-                If ($Ref -eq $Main)
-                {
-                    $revision = "HEAD^1"
-                }
-                Else
-                {
-                    $revision = $Main
-                    Invoke-GitFetch -Depth 1 -Quiet origin "${Main}:$Main"
-
-                    $topic = $Ref -replace "[^a-zA-Z0-9]",""
-                    $prerelease = $topic + ("{0:000000}" -f $Build)
-
-                    Update-ModuleManifest -Path $manifestPath -Prerelease $prerelease
-                }
-
-                $path = [IO.Path]::GetTempFileName() + ".psd1"
-                git show "${Revision}:$(Resolve-Path $manifestPath -Relative)" > "$path" 2> $Null
-                If (-Not $LastExitCode)
-                {
-                    [Version] $current = (Test-ModuleManifest $path).Version
-
-                    If (-not ($version -gt $current))
-                    {
-                        $errors += "Version in manifest does not increment $current"
-                    }
-                }
-            }
-            ElseIf($version -ne [Version] "0.0.1" -and $version -ne [Version] "0.1.0" -and $version -ne [Version] "1.0.0")
-            {
-                $errors += "Version in manifest should be 0.0.1, 0.1.0, or 1.0.0 on initial commit, or fetch depth must be at least 2."
-            }
-        }
+        # TODO: use $version to update the version in the copied manifest file (to add the suffix)
     }
 
-    # Exit with errors
-    If ($errors)
-    {
-        $errors | ForEach-Object `
-        {
-            If ($Env:GITHUB_ACTIONS -eq "true")
-            {
-                Write-Information "::error::$_"
-            }
-            ElseIf ($Env:TF_BUILD -eq "True")
-            {
-                Write-Information "##vso[task.logIssue type=error]$_"
-            }
-            Else
-            {
-                $Host.UI.WriteErrorLine($_)
-            }
-        }
-        $errors.Clear()
+        # # Build package
+        # $repositories = @(Get-PSRepository | Where-Object {
+        #     $location = $_.SourceLocation
+        #     if ([uri]::IsWellFormedUriString($location, [System.UriKind]::Absolute))
+        #     {
+        #         return $false
+        #     }
+        #     return (Get-CanonicalPath $location) -eq (Get-CanonicalPath $ArtifactsPath)
+        # })
 
-        Exit 1
-    }
+    # if ($repositories.Length -eq 0) {
+    #     $unregisterRepository = $true
+    #     Register-PSRepository -Name $Name `
+    #         -SourceLocation $ArtifactsPath `
+    #         -PublishLocation $ArtifactsPath `
+    #         -ErrorAction Stop
+    #     $repositoryName = $Name
+    # }
+    # else {
+    #     $repositoryName = $repositories[0].Name
+    # }
 
-    # Build package
-    $repositories = @(Get-PSRepository | Where-Object {
-        $location = $_.SourceLocation
-        if ([uri]::IsWellFormedUriString($location, [System.UriKind]::Absolute))
-        {
-            return $false
-        }
-        return (Get-CanonicalPath $location) -eq (Get-CanonicalPath $ArtifactsPath)
-    })
+    # Publish-Module `
+    #     -Path (Split-Path -Path $manifest.Path -Parent) `
+    #     -Repository $repositoryName
 
-    if ($repositories.Length -eq 0) {
-        $unregisterRepository = $true
-        Register-PSRepository -Name $Name `
-            -SourceLocation $ArtifactsPath `
-            -PublishLocation $ArtifactsPath `
-            -ErrorAction Stop
-        $repositoryName = $Name
-    }
-    else {
-        $repositoryName = $repositories[0].Name
-    }
+    # $ignore = $Error |
+    #     Where-Object { $_.CategoryInfo.Activity -eq "Find-Package" } |
+    #     Where-Object { $_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound }
+    # $ignore | ForEach-Object { $Error.Remove($_) }
 
-    Publish-Module `
-        -Path (Split-Path -Path $manifestPath -Parent) `
-        -Repository $repositoryName
+    # if ($unregisterRepository) {
+    #     Unregister-PSRepository $repositoryName
+    # }
 
-    $ignore = $Error |
-        Where-Object { $_.CategoryInfo.Activity -eq "Find-Package" } |
-        Where-Object { $_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound }
-    $ignore | ForEach-Object { $Error.Remove($_) }
-
-    if ($unregisterRepository) {
-        Unregister-PSRepository $repositoryName
-    }
-
-    # Push package
-    If ($NuGetUrl -and $NuGetApiKey)
-    {
-        Get-ChildItem $ArtifactsPath "*.nupkg" | ForEach-Object {
-            Invoke-DotnetNugetPush $_.FullName -ApiKey $NuGetApiKey -SkipDuplicate -Source $NuGetUrl
-        }
-    }
+    # # Push package
+    # If ($NuGetUrl -and $NuGetApiKey)
+    # {
+    #     Get-ChildItem $ArtifactsPath "*.nupkg" | ForEach-Object {
+    #         Invoke-DotnetNugetPush $_.FullName -ApiKey $NuGetApiKey -SkipDuplicate -Source $NuGetUrl
+    #     }
+    # }
 }
