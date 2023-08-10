@@ -1,16 +1,19 @@
+$tagRegex = "v\d+\.\d+\.\d+"
+
 Function Publish-PowerShellModule
 {
+    [CmdletBinding()]
     Param (
         [Parameter()]
         [string]$Name = (Split-Path $Pwd -Leaf),
         [Parameter()]
         [string]$Ref = (&{
-            $describeResult = Invoke-GitDescribe -Tags -ExactMatch -Match "v*.*.*" HEAD
-            If ($describeResult.ExitCode -eq 0)
+            $tag = Get-MatchingTagForGitHeadCommit($tagRegex)
+            if ($tag)
             {
-                Return $describeResult.Stdout[0]
+                return $tag
             }
-            Else
+            else
             {
                 $revParseResult = Invoke-GitRevParse -ParseOpt -AbbrevRef HEAD
                 if ($revParseResult.ExitCode -eq 0) {
@@ -253,3 +256,26 @@ Function Publish-PowerShellModule
         }
     }
 }
+
+# Extracted functions
+# TODO: further refactor and move functions/cmdlets and tests to separate files
+
+function Get-MatchingTagForGitHeadCommit([string]$Regex) {
+    $parameters = @{
+        ExactMatch = $true # only tags that directly reference the commit
+        Tags = $true # allow unannotated (lightweight) tags
+    }
+    $result = Invoke-GitDescribe HEAD @parameters
+
+    If ($result.ExitCode -ne 0)
+    {
+        return
+    }
+    
+    $tag = $result.Stdout[0]
+
+    if ($regex -and $tag -cmatch $regex) {
+        return $tag
+    }
+}
+
