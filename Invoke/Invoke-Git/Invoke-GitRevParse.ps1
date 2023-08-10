@@ -118,8 +118,13 @@ function Invoke-GitRevParse {
 
         # Args
 
-        [Parameter(ValueFromRemainingArguments)]
-        [string[]]$ArgumentsToParse
+        # Revisions to parse
+        [Parameter()]
+        [string[]]$Revisions,
+
+        # File paths to parse
+        [Parameter()]
+        [string[]]$Paths
     )
 
     $Arguments = @()
@@ -210,5 +215,5 @@ function Invoke-GitRevParse {
         $Arguments += "--symbolic-full-name"
     }
 
-    Invoke-Git "rev-parse" @Arguments @ArgumentsToParse
+    Invoke-Git "rev-parse" @Arguments @Revisions "--" @Paths
 }

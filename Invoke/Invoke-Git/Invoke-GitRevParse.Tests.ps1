@@ -27,8 +27,10 @@ Describe Invoke-GitRevParse {
                 AbbrevRev = "Loose"
                 Symbolic = $true
                 SymbolicFullName = $true
+                Revisions = 4,5,6
+                Paths = 7,8,9
             }
-            Invoke-GitRevParse @parameters -option arg
+            Invoke-GitRevParse @parameters
 
             # Assert
             Should -Invoke Invoke-Git -ParameterFilter {
@@ -52,9 +54,9 @@ Describe Invoke-GitRevParse {
                     "--abbrev-rev=loose"
                     "--symbolic"
                     "--symbolic-full-name"
-                    
-                    "-option"
-                    "arg"
+                    4, 5, 6
+                    "--"
+                    7, 8, 9
                 ) | ForEach-Object {
                     $Arguments[$i++] | Should -BeExactly $_
                 }
