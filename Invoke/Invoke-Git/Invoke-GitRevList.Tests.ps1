@@ -1,8 +1,7 @@
 BeforeAll {
     . $PSCommandPath.Replace(".Tests.ps1", ".ps1")
-    . (Join-Path $PSScriptRoot "Invoke-Git.ps1")
 
-    Mock Invoke-Git {}
+    Mock Invoke-Git
 }
 
 Describe Invoke-GitRevList {

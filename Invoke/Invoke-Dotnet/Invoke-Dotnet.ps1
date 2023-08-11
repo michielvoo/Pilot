@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot (Join-Path ".." "Invoke-NativeCommand.ps1"))
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "..", "Invoke-NativeCommand.ps1"))
 
 # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet
 

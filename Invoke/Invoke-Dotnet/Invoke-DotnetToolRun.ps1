@@ -1,4 +1,4 @@
-. (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
+. (Join-Path $PSScriptRoot "Invoke-DotnetTool.ps1")
 
 # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-tool-run
 
