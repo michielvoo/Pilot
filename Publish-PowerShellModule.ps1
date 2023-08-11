@@ -1,24 +1,17 @@
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Get-CurrentGitVersionTagOrBranch.ps1"))
+
 Function Publish-PowerShellModule
 {
+    [CmdletBinding()]
     Param (
         [Parameter()]
         [string]$Name = (Split-Path $Pwd -Leaf),
         [Parameter()]
-        [string]$Ref = (&{
-            $Tag = git describe --tags --exact-match --match "v*.*.*" HEAD 2> $null
-            If ($LastExitCode -eq 0)
-            {
-                Return $Tag
-            }
-            Else
-            {
-                Return (git rev-parse --abbrev-ref HEAD 2> $null)
-            }
-        }),
+        [string]$Ref = (&{Get-CurrentGitVersionTagOrBranch}),
         [Parameter()]
         [string]$Main = "main",
         [Parameter()]
-        [int]$Build = ([int][Math]::Ceiling([double]::Parse((Get-Date -UFormat %s), [CultureInfo]::CurrentCulture))),
+        [int]$Build = (&{Get-UnixTimestamp}),
         [Parameter()]
         [string]$ArtifactsPath = (Join-Path $Pwd "artifacts"),
         [Parameter()]
@@ -141,6 +134,7 @@ Function Publish-PowerShellModule
     [Version] $version = $manifest.Version
     If ($version)
     {
+        $revListResult = Invoke-GitRevList -Count HEAD
         If ($Ref -match "^v\d+\.\d+\.\d+$")
         {
             If ("v$($version.Major).$($version.Minor).$($version.Build)" -ne $Ref)
@@ -148,7 +142,7 @@ Function Publish-PowerShellModule
                 $errors += "Version in manifest ($version) does not match tag ($Ref)"
             }
         }
-        ElseIf ((git rev-list --count HEAD) -gt 1)
+        ElseIf ($revListResult.Stdout[0] -gt 1)
         {
             If ($Ref -eq $Main)
             {
@@ -157,7 +151,7 @@ Function Publish-PowerShellModule
             Else
             {
                 $revision = $Main
-                git fetch origin "${Main}:$Main" --depth=1 --quiet
+                Invoke-GitFetch -Depth 1 -Quiet origin "${Main}:$Main"
 
                 $topic = $Ref -replace "[^a-zA-Z0-9]",""
                 $prerelease = $topic + ("{0:000000}" -f $Build)

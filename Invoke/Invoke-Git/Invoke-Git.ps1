@@ -1,7 +1,7 @@
-. (Join-Path $PSScriptRoot "Invoke-NativeCommand.ps1")
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "..", "Invoke-NativeCommand.ps1"))
 
-# The generic driver for the .NET CLI.
-function Invoke-Dotnet {
+# The stupid content tracker
+function Invoke-Git {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param (
@@ -12,5 +12,5 @@ function Invoke-Dotnet {
         [string[]]$Arguments
     )
 
-    Invoke-NativeCommand "dotnet" $Command @Arguments
+    Invoke-NativeCommand "git" $Command @Arguments
 }

@@ -1,12 +1,11 @@
 BeforeAll {
     . $PSCommandPath.Replace(".Tests.ps1", ".ps1")
-    . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
-    Mock Invoke-Dotnet {}
+    Mock Invoke-Dotnet
 }
 
 Describe Invoke-DotnetMSBuild {
-    It "invokes dotnet with command msbuild and arguments" {
+    It "invokes Invoke-Dotnet with command msbuild and arguments" {
         # Act
         $parameters = @{
             DetailedSummary = $true
@@ -20,8 +19,8 @@ Describe Invoke-DotnetMSBuild {
             NoAutoResponse = $true
             NodeReuse = $true
             NoLogo = $true
-            Preprocess = 2
-            OutputResultsCache = 3
+            Preprocess = "2"
+            OutputResultsCache = "3"
             ProfileEvaluation = 4
             Properties = @{
                 PropertyB = "B"
@@ -35,6 +34,21 @@ Describe Invoke-DotnetMSBuild {
                 PropertyF = "F"
             }
             Target = @("t1", "t2")
+            Targets = "4"
+            ToolsVersion = 5
+            Validate = "6"
+            Verbosity = 7
+            Version = $true
+            WarnAsError = "8"
+            WarnNotAsError = "9", "10"
+            WarnAsMessage = "11"
+            BinaryLogger = "12"
+            BinaryLoggerProjectImports = "None"
+            ConsoleLoggerParameters = @{
+                Summary = $true
+                ErrorsOnly = $true
+                Verbosity = "Minimal"
+            }
         }
         Invoke-DotnetMSBuild proj @parameters arg1 arg2
 
@@ -46,8 +60,8 @@ Describe Invoke-DotnetMSBuild {
                 "proj"
                 "-detailedSummary:True"
                 "-graphBuild:True"
-                "-ignoreProjectExtensions:a,b,c"
-                "-inputResultsCaches:d,e,f"
+                "-ignoreProjectExtensions:a;b;c"
+                "-inputResultsCaches:d;e;f"
                 "-interactive:True"
                 "-isolateProjects:Message"
                 "-lowPriority:True"
@@ -66,8 +80,52 @@ Describe Invoke-DotnetMSBuild {
                 "-restoreProperty:PropertyE=E"
                 "-restoreProperty:PropertyF=F"
                 "-target:t1,t2"
+                "-targets:4"
+                "-toolsVersion:5"
+                "-validate:6"
+                "-verbosity:7"
+                "-version"
+                "-warnAsError:8"
+                "-warnNotAsError:9;10"
+                "-warnAsMessage:11"
+                "-binaryLogger:LogFile=12;ProjectImports=None"
+                "-consoleLoggerParameters:ErrorsOnly;Summary;Verbosity=Minimal"
                 "arg1"
                 "arg2"
+            ) | ForEach-Object {
+                $Arguments[$i++] | Should -BeExactly $_
+            }
+
+            $true
+        }
+    }
+
+    It "invokes Invoke-Dotnet with switch for specific parameter when argument is `$true" {
+        # Act
+        $parameters = @{
+            MaxCpuCount = $true
+            Preprocess = $true
+            OutputResultsCache = $true
+            Targets = $true
+            Validate = $true
+            WarnAsError = $true
+            WarnNotAsError = $true
+            WarnAsMessage = $true
+        }
+        Invoke-DotnetMSBuild proj @parameters
+
+        # Assert
+        Should -Invoke Invoke-Dotnet -ParameterFilter {
+            $i = 1
+            @(
+                "-maxCpuCount"
+                "-preprocess"
+                "-outputResultsCache"
+                "-targets"
+                "-validate"
+                "-warnAsError"
+                "-warnNotAsError"
+                "-warnAsMessage"
             ) | ForEach-Object {
                 $Arguments[$i++] | Should -BeExactly $_
             }

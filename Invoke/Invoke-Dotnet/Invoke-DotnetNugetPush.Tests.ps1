@@ -1,8 +1,7 @@
 BeforeAll {
     . $PSCommandPath.Replace(".Tests.ps1", ".ps1")
-    . (Join-Path $PSScriptRoot "Invoke-DotnetNuget.ps1")
 
-    Mock Invoke-DotnetNuget {}
+    Mock Invoke-DotnetNuget
 }
 
 Describe Invoke-DotnetNugetPush {

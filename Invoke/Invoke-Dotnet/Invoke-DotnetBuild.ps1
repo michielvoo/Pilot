@@ -1,14 +1,18 @@
 . (Join-Path $PSScriptRoot "Invoke-Dotnet.ps1")
 
+# https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build
+
 # .SYNOPSIS
 # Builds a project and all of its dependencies.
 function Invoke-DotnetBuild {
     [CmdletBinding()]
     [OutputType([hashtable])]
     param (
-        # The project or solution file to build.
-        [Parameter(Mandatory, Position = 0)]
-        [string] $Solution,
+        # The project or solution file to build. If a project or solution file isn't specified,
+        # MSBuild searches the current working directory for a file that has a file extension that
+        # ends in either proj or sln and uses that file.
+        [Parameter(Position = 0)]
+        [string] $ProjectOrSolution,
 
         # Specifies the target architecture. This is a shorthand syntax for setting the Runtime
         # Identifier (RID), where the provided value is combined with the default RID. For example,
@@ -25,12 +29,6 @@ function Invoke-DotnetBuild {
         [Parameter()]
         [string]$Configuration,
 
-        # Compiles for a specific framework. The framework must be defined in the project file.
-        # Examples: `net7.0`, `net462`.
-        [Alias("F")]
-        [Parameter()]
-        [string]$Framework,
-
         # Forces the command to ignore any persistent build servers. This option provides a
         # consistent way to disable all use of build caching, which forces a build from scratch.
         # A build that doesn't rely on caches is useful when the caches might be corrupted or
@@ -38,6 +36,12 @@ function Invoke-DotnetBuild {
         # Available since .NET 7 SDK.
         [Parameter()]
         [switch]$DisableBuildServers,
+
+        # Compiles for a specific framework. The framework must be defined in the project file.
+        # Examples: `net7.0`, `net462`.
+        [Alias("F")]
+        [Parameter()]
+        [string]$Framework,
 
         # Forces all dependencies to be resolved even if the last restore was successful.
         # Specifying this flag is the same as deleting the project.assets.json file.
@@ -73,14 +77,6 @@ function Invoke-DotnetBuild {
         [Parameter()]
         [switch]$NoSelfContained,
 
-        # Specifies the target operating system (OS). This is a shorthand syntax for setting the
-        # Runtime Identifier (RID), where the provided value is combined with the default RID. For
-        # example, on a `win-x64` machine, specifying `-OS linux` sets the RID to `linux-x64`. If
-        # you use this parameter, don't use the `-Runtime` parameter.
-        # Available since .NET 6.
-        [Parameter()]
-        [string]$OS,
-
         # Directory in which to place the built binaries. If not specified, the default path is
         # `./bin/<configuration>/<framework>/`. For projects with multiple target frameworks (via
         # the `TargetFrameworks` property), you also need to define `-Framework` when you specify
@@ -88,6 +84,14 @@ function Invoke-DotnetBuild {
         [Alias("O")]
         [Parameter()]
         [string]$Output,
+
+        # Specifies the target operating system (OS). This is a shorthand syntax for setting the
+        # Runtime Identifier (RID), where the provided value is combined with the default RID. For
+        # example, on a `win-x64` machine, specifying `-OS linux` sets the RID to `linux-x64`. If
+        # you use this parameter, don't use the `-Runtime` parameter.
+        # Available since .NET 6.
+        [Parameter()]
+        [string]$OS,
 
         # Sets one or more MSBuild properties.
         [Alias("P")]
@@ -107,7 +111,7 @@ function Invoke-DotnetBuild {
         # specified.
         # Available since .NET 6.
         [Parameter()]
-        [switch]$SelfContained,
+        [bool]$SelfContained,
 
         # The URI of the NuGet package source to use during the restore operation.
         [Parameter()]
@@ -123,6 +127,14 @@ function Invoke-DotnetBuild {
         [Parameter()]
         [string]$TL,
 
+        # Sets the verbosity level of the command. Allowed values are `Q[uiet]`, `M[inimal]`,
+        # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Minimal`. By default,
+        # MSBuild displays warnings and errors at all verbosity levels. To exclude warnings, use
+        # `-Properties @{ WarningLevel = 0 }`.
+        [Alias("V")]
+        [Parameter()]
+        [string]$Verbosity,
+
         # Sets the `RuntimeIdentifier` to a platform portable `RuntimeIdentifier` based on the one
         # of your machine. This happens implicitly with properties that require a `RuntimeIdentifier`,
         # such as `SelfContained`, `PublishAot`, `PublishSelfContained`, `PublishSingleFile`, and
@@ -130,14 +142,7 @@ function Invoke-DotnetBuild {
         # longer occur.
         [Alias("UCR")]
         [Parameter()]
-        [switch]$UseCurrentRuntime,
-
-        # Sets the verbosity level of the command. Allowed values are `Q[uiet]`, `M[inimal]`,
-        # `N[ormal]`, `D[etailed]`, and `Diag[nostic]`. The default is `Minimal`. By default,
-        # MSBuild displays warnings and errors at all verbosity levels. To exclude warnings, use
-        # `-Properties @{ WarningLevel = 0 }`.
-        [Parameter()]
-        [string]$Verbosity,
+        [bool]$UseCurrentRuntime,
 
         # Sets the value of the `$(VersionSuffix)` property to use when building the project. This
         # only works if the `$(Version)` property isn't set. Then, `$(Version)` is set to the
@@ -146,7 +151,9 @@ function Invoke-DotnetBuild {
         [string]$VersionSuffix
     )
 
-    $Arguments = @($Solution)
+    if ($ProjectOrSolution) {
+        $Arguments = @($ProjectOrSolution)
+    }
 
     if ($Arch) {
         $Arguments += "--arch",$Arch
@@ -156,12 +163,12 @@ function Invoke-DotnetBuild {
         $Arguments += "--configuration",$Configuration
     }
 
-    if ($Framework) {
-        $Arguments += "--framework",$Framework
-    }
-
     if ($DisableBuildServers) {
         $Arguments += "--disable-build-servers"
+    }
+
+    if ($Framework) {
+        $Arguments += "--framework",$Framework
     }
 
     if ($Force) {
@@ -192,12 +199,12 @@ function Invoke-DotnetBuild {
         $Arguments += "--no-self-contained"
     }
 
-    if ($OS) {
-        $Arguments += "--os",$OS
-    }
-
     if ($Output) {
         $Arguments += "--output",$Output
+    }
+
+    if ($OS) {
+        $Arguments += "--os",$OS
     }
 
     if ($Properties) {
@@ -210,8 +217,14 @@ function Invoke-DotnetBuild {
         $Arguments += "--runtime",$Runtime
     }
 
-    if ($SelfContained) {
+    if ($null -ne $SelfContained) {
         $Arguments += "--self-contained"
+        if ($SelfContained) {
+            $Arguments += "true"
+        }
+        else {
+            $Arguments += "false"
+        }
     }
 
     if ($Source) {
@@ -222,12 +235,18 @@ function Invoke-DotnetBuild {
         $Arguments += "--tl",$TL
     }
 
-    if ($UseCurrentRuntime) {
-        $Arguments += "--use-current-runtime"
-    }
-
     if ($Verbosity) {
         $Arguments += "--verbosity",$Verbosity
+    }
+
+    if ($null -ne $UseCurrentRuntime) {
+        $Arguments += "--use-current-runtime"
+        if ($UseCurrentRuntime) {
+            $Arguments += "true"
+        }
+        else {
+            $Arguments += "false"
+        }
     }
 
     if ($VersionSuffix) {
