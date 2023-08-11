@@ -1,3 +1,5 @@
+. ([string]::Join([IO.Path]::DirectorySeparatorChar, $PSScriptRoot, "Private", "Get-CurrentGitVersionTagOrBranch.ps1"))
+
 Function Publish-PowerShellModule
 {
     [CmdletBinding()]
@@ -9,7 +11,7 @@ Function Publish-PowerShellModule
         [Parameter()]
         [string]$Main = "main",
         [Parameter()]
-        [int]$Build = ([int][Math]::Ceiling([double]::Parse((Get-Date -UFormat %s), [CultureInfo]::CurrentCulture))),
+        [int]$Build = (&{Get-UnixTimestamp}),
         [Parameter()]
         [string]$ArtifactsPath = (Join-Path $Pwd "artifacts"),
         [Parameter()]
