@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Select environment
         id: select
-        run: 'Write-Host ("::set-output name=environment::" + ("${{ github.ref_type }}" -eq "tag" ? "PowerShell Gallery" : "MyGet"))'
+        run: 'Write-Output ("environment=" + ("${{ github.ref_type }}" -eq "tag" ? "PowerShell Gallery" : "MyGet")) >> "$Env:GITHUB_OUTPUT"'
 
   publish:
     name: Publish
@@ -30,7 +30,7 @@ jobs:
     environment: ${{ needs.prepare.outputs.environment }}
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
       - name: Publish
