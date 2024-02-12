@@ -6,9 +6,9 @@
     Copyright = "Copyright (c) 2023 Michiel van Oosterhout"
     Description = "Pilot builds, verifies, and publishes prerelease and release versions of PowerShell modules based on version control events (branch & commit, merge, and tag), and ensures that module metadata is complete, consistent, and correct."
     FileList = @(
-        "Invoke/Invoke-Dotnet.ps1"
-        "Invoke/Invoke-DotnetNuget.ps1"
-        "Invoke/Invoke-DotnetNugetPush.ps1"
+        "Invoke/Invoke-Dotnet/Invoke-Dotnet.ps1"
+        "Invoke/Invoke-Dotnet/Invoke-DotnetNuget.ps1"
+        "Invoke/Invoke-Dotnet/Invoke-DotnetNugetPush.ps1"
         "Invoke/Invoke-NativeCommand.ps1"
         "Invoke/Invoke.psm1"
         "Pathfinder/Get-CanonicalPath.ps1"
