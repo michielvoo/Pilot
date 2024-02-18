@@ -20,7 +20,7 @@
             "windows": {
                 "command": "powershell.exe"
             },
-            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Test", "${workspaceFolder}"],
+            "args": ["-File", ".vscode/tasks.ps1", "Test", "${workspaceFolder}"],
             "group": {
                 "kind": "test",
                 "isDefault": true
@@ -28,13 +28,13 @@
         },
         {
             "label": "Test current",
-            "detail": "Run Pester tests in or for currently opened file",
+            "detail": "Run Pester tests in or for the currently opened PowerShell file",
             "type": "process",
             "command": "pwsh",
             "windows": {
                 "command": "powershell.exe"
             },
-            "args": ["-File", ".vscode${pathSeparator}tasks.ps1", "Test", "${file}"],
+            "args": ["-File", ".vscode/tasks.ps1", "Test", "${file}"],
             "group": {
                 "kind": "test",
                 "isDefault": false
