@@ -10,6 +10,7 @@ function Invoke-NativeCommand {
     )
 
     $result = @{
+        CommandLine = "$LiteralPath $([string]::Join(" ", $Arguments))"
         ExitCode = 0
         Stderr = @()
         Stdout = @()
