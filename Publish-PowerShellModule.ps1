@@ -58,7 +58,7 @@ Function Publish-PowerShellModule
                 OutputPath = Join-Path (&{If ($null -eq $TestArtifactsPath) {Return $ArtifactsPath} Else {Return $TestArtifactsPath}}) "coverage.xml"
             }
             Output = @{
-                Verbosity = "None"
+                Verbosity = "Normal"
             }
             Run = @{
                 Exit = $false
