@@ -13,34 +13,54 @@ switch ($Task) {
     }
 
     "Test" {
-        $configuration = New-PesterConfiguration
+        if ($Arguments.Length -eq 0) {
+            Write-Warning "Test task requires one argument"
+
+            return
+        }
 
         $path = $Arguments[0]
-        if ($null -eq $path) {
-            Write-Warning "Test task requires a path"
-        }
-        elseif (-not (Test-Path $path)) {
-            Write-Warning "$path not found"
-        }
-        elseif ((Get-Item $path).PSIsContainer) {
-            $configuration.Run.Path = $path
-            Invoke-Pester -Configuration $configuration
-        }
-        elseif (-not ($path.EndsWith(".ps1"))) {
-            Write-Warning "Cannot test $(Split-Path $path -Leaf)"
-        }
-        elseif ($path.EndsWith(".Tests.ps1") -or (Test-Path $path.Replace(".ps1", ".Tests.ps1"))) {
-            if (-not ($path.EndsWith(".Tests.ps1"))) {
-                $path = $path.Replace(".ps1", ".Tests.ps1")
-            }
 
-            $configuration.Output.Verbosity = "Detailed"
+        if (-not (Test-Path $path)) {
+            Write-Warning "File or directory not found ($path)"
+
+            return
+        }
+
+        $configuration = New-PesterConfiguration
+        $configuration.Run.Path = $path
+
+        if ((Get-Item $path).PSIsContainer) {
+            Invoke-Pester -Configuration $configuration
+
+            return
+        }
+
+        $configuration.Output.Verbosity = "Detailed"
+
+        if ($path.ToLowerInvariant().EndsWith(".tests.ps1")) {
+            Invoke-Pester -Configuration $configuration
+
+            return
+        }
+
+        if (-not ($path.ToLowerInvariant().EndsWith(".ps1"))) {
+            Write-Warning "File type not supported ($([System.IO.Path]::GetExtension($path)))"
+
+            return
+        }
+
+        $fileNameWithoutExtension = [System.IO.Path]::GetFileNameWithoutExtension($path)
+        $path = Join-Path (Split-Path $path -Parent) "$fileNameWithoutExtension.Tests.ps1"
+
+        if (Test-Path $path) {
             $configuration.Run.Path = $path
             Invoke-Pester -Configuration $configuration
+
+            return
         }
-        else {
-            Write-Warning "$(Split-Path $path -Leaf) has no tests"
-        }
+
+        Write-Warning "File not found ($path)"
     }
 
     "Run" {
