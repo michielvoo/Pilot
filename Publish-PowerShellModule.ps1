@@ -117,69 +117,73 @@ Function Publish-PowerShellModule
         }
     }
 
-    # Copy files
-    $tempModulePath = Join-Path `
-        -Path (Join-Path `
-            -Path ([IO.Path]::GetTempPath()) `
-            -ChildPath ([IO.Path]::GetRandomFileName())) `
-        -ChildPath $Name
-    New-Item -ItemType Directory -Path $tempModulePath | Out-Null
+    # Steps for a valid manifest
+    if ($null -ne $manifest) {
 
-    ForEach ($path in $manifest.FileList)
-    {
-        $relativePath = Resolve-Path -Path $path -Relative
-        $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
-        New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
-        Copy-Item -Path $path -Destination $absolutePath
-    }
+        # Copy files
+        $tempModulePath = Join-Path `
+            -Path (Join-Path `
+                -Path ([IO.Path]::GetTempPath()) `
+                -ChildPath ([IO.Path]::GetRandomFileName())) `
+            -ChildPath $Name
+        New-Item -ItemType Directory -Path $tempModulePath | Out-Null
 
-    # Adjust manifest path
-    $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
-    $manifestPath = Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
-
-    # Versioning
-    [Version] $version = $manifest.Version
-    If ($version)
-    {
-        If ($Ref -match "^v\d+\.\d+\.\d+$")
+        ForEach ($path in $manifest.FileList)
         {
-            If ("v$($version.Major).$($version.Minor).$($version.Build)" -ne $Ref)
-            {
-                $errors += "Version in manifest ($version) does not match tag ($Ref)"
-            }
+            $relativePath = Resolve-Path -Path $path -Relative
+            $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
+            New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
+            Copy-Item -Path $path -Destination $absolutePath
         }
-        ElseIf ((git rev-list --count HEAD) -gt 1)
+
+        # Adjust manifest path
+        $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
+        $manifestPath = Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
+
+        # Versioning
+        [Version] $version = $manifest.Version
+        If ($version)
         {
-            If ($Ref -eq $Main)
+            If ($Ref -match "^v\d+\.\d+\.\d+$")
             {
-                $revision = "HEAD^1"
-            }
-            Else
-            {
-                $revision = $Main
-                git fetch origin "${Main}:$Main" --depth=1 --quiet
-
-                $topic = $Ref -replace "[^a-zA-Z0-9]",""
-                $prerelease = $topic + ("{0:000000}" -f $Build)
-
-                Update-ModuleManifest -Path $manifestPath -Prerelease $prerelease
-            }
-
-            $path = [IO.Path]::GetTempFileName() + ".psd1"
-            git show "${Revision}:$(Resolve-Path $manifestPath -Relative)" > "$path" 2> $Null
-            If (-Not $LastExitCode)
-            {
-                [Version] $current = (Test-ModuleManifest $path).Version
-
-                If (-not ($version -gt $current))
+                If ("v$($version.Major).$($version.Minor).$($version.Build)" -ne $Ref)
                 {
-                    $errors += "Version in manifest does not increment $current"
+                    $errors += "Version in manifest ($version) does not match tag ($Ref)"
                 }
             }
-        }
-        ElseIf($version -ne [Version] "0.0.1" -and $version -ne [Version] "0.1.0" -and $version -ne [Version] "1.0.0")
-        {
-            $errors += "Version in manifest should be 0.0.1, 0.1.0, or 1.0.0 on initial commit, or fetch depth must be at least 2."
+            ElseIf ((git rev-list --count HEAD) -gt 1)
+            {
+                If ($Ref -eq $Main)
+                {
+                    $revision = "HEAD^1"
+                }
+                Else
+                {
+                    $revision = $Main
+                    git fetch origin "${Main}:$Main" --depth=1 --quiet
+
+                    $topic = $Ref -replace "[^a-zA-Z0-9]",""
+                    $prerelease = $topic + ("{0:000000}" -f $Build)
+
+                    Update-ModuleManifest -Path $manifestPath -Prerelease $prerelease
+                }
+
+                $path = [IO.Path]::GetTempFileName() + ".psd1"
+                git show "${Revision}:$(Resolve-Path $manifestPath -Relative)" > "$path" 2> $Null
+                If (-Not $LastExitCode)
+                {
+                    [Version] $current = (Test-ModuleManifest $path).Version
+
+                    If (-not ($version -gt $current))
+                    {
+                        $errors += "Version in manifest does not increment $current"
+                    }
+                }
+            }
+            ElseIf($version -ne [Version] "0.0.1" -and $version -ne [Version] "0.1.0" -and $version -ne [Version] "1.0.0")
+            {
+                $errors += "Version in manifest should be 0.0.1, 0.1.0, or 1.0.0 on initial commit, or fetch depth must be at least 2."
+            }
         }
     }
 
