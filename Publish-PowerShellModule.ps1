@@ -36,8 +36,45 @@ Function Publish-PowerShellModule
     }
     Get-ChildItem $ArtifactsPath -Recurse | Remove-Item -Force
 
-    # Validate manifest
+    # Install and import required module
     $manifestPath = Join-Path $Pwd "$Name.psd1"
+    try {
+        $manifest = Import-PowerShellDataFile $manifestPath
+        foreach ($module in $manifest.RequiredModules) {
+            $parameters = @{
+                Force = $true
+            }
+
+            if ($module -is [string]) {
+                $parameters.Name = $module
+            }
+            else {
+                # Conforms to [Microsoft.PowerShell.Commands.ModuleSpecification]
+                $parameters.Name = $module.Name
+
+                if ($module.RequiredVersion) {
+                    $parameters.RequiredVersion = $module.RequiredVersion
+                }
+                else {
+                    if ($module.ModuleVersion) {
+                        $parameters.MinimumVersion = $module.ModuleVersion
+                    }
+                    if ($module.MaximumVersion) {
+                        $parameters.MaximumVersion = $module.MaximumVersion
+                    }
+                }
+            }
+
+            Install-Module -AcceptLicense -AllowPrerelease @parameters
+            Import-Module -DisableNameChecking @parameters
+        }
+    }
+    catch {
+        $errors += $_.Exception.Message
+        $Error.Clear()
+    }
+
+    # Validate manifest
     Try
     {
         $manifest = Test-ModuleManifest $manifestPath
