@@ -50,7 +50,7 @@ Function Publish-PowerShellModule
             }
             else {
                 # Conforms to [Microsoft.PowerShell.Commands.ModuleSpecification]
-                $parameters.Name = $module.Name
+                $parameters.Name = $module.ModuleName
 
                 if ($module.RequiredVersion) {
                     $parameters.RequiredVersion = $module.RequiredVersion
