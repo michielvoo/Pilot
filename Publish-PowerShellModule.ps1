@@ -36,7 +36,7 @@ Function Publish-PowerShellModule
     }
     Get-ChildItem $ArtifactsPath -Recurse | Remove-Item -Force
 
-    # Install and import required module
+    # Satisfy required modules constraints
     $manifestPath = Join-Path $Pwd "$Name.psd1"
     try {
         $manifest = Import-PowerShellDataFile $manifestPath
@@ -47,26 +47,35 @@ Function Publish-PowerShellModule
 
             if ($module -is [string]) {
                 $parameters.Name = $module
+                $packageFileName = "$module.0.0.1.nupkg"
             }
             else {
-                # Conforms to [Microsoft.PowerShell.Commands.ModuleSpecification]
                 $parameters.Name = $module.ModuleName
+                $packageFileName = $module.ModuleName
 
                 if ($module.RequiredVersion) {
                     $parameters.RequiredVersion = $module.RequiredVersion
+                    $packageFileName = "$packageFileName.$($module.RequiredVersion).nupkg"
+                }
+                elseif ($module.ModuleVersion) {
+                    $parameters.MinimumVersion = $module.ModuleVersion
+                    $packageFileName = "$packageFileName.$($module.ModuleVersion).nupkg"
+
+                    if ($module.MaximumVersion) {
+                        $parameters.MaximumVersion = $module.MaximumVersion -replace "\*","99999999"
+                    }
                 }
                 else {
-                    if ($module.ModuleVersion) {
-                        $parameters.MinimumVersion = $module.ModuleVersion
-                    }
-                    if ($module.MaximumVersion) {
-                        $parameters.MaximumVersion = $module.MaximumVersion
-                    }
+                    $packageFileName = "$packageFileName.0.0.1.nupkg"
                 }
             }
 
+            # Required modules must be imported in current sessionn for Test--ModuleManifest
             Install-Module -AcceptLicense -AllowPrerelease @parameters
             Import-Module -DisableNameChecking @parameters
+
+            # Required modules must be present in the staging repository
+            New-Item "$ArtifactsPath/$packageFileName" -Force -ItemType File
         }
     }
     catch {

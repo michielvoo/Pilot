@@ -1,1 +1,1 @@
-. (Join-Path -Path $PSScriptRoot -ChildPath "Publish-PowerShellModule.ps1")
+. "$PSScriptRoot/Publish-PowerShellModule.ps1"
