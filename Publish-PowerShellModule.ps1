@@ -37,45 +37,58 @@ Function Publish-PowerShellModule
     Get-ChildItem $ArtifactsPath -Recurse | Remove-Item -Force
 
     # Satisfy required modules constraints
+    $requiredModules = @()
+    $tempModulesPath = "$([IO.Path]::GetTempPath())/$([IO.Path]::GetRandomFileName())"
     $manifestPath = Join-Path $Pwd "$Name.psd1"
     try {
         $manifest = Import-PowerShellDataFile $manifestPath
         foreach ($module in $manifest.RequiredModules) {
-            $parameters = @{
-                Force = $true
-            }
+            $requiredModule = @{}
+
+            $parameters = @{}
 
             if ($module -is [string]) {
-                $parameters.Name = $module
-                $packageFileName = "$module.0.0.1.nupkg"
+                $moduleName = $module
+                $requiredModule.ModuleVersion = "0.0.1"
             }
             else {
-                $parameters.Name = $module.ModuleName
-                $packageFileName = $module.ModuleName
+                $moduleName = $module.ModuleName
 
                 if ($module.RequiredVersion) {
+                    $requiredModule.ModuleVersion = $module.RequiredVersion
                     $parameters.RequiredVersion = $module.RequiredVersion
-                    $packageFileName = "$packageFileName.$($module.RequiredVersion).nupkg"
                 }
                 elseif ($module.ModuleVersion) {
+                    $requiredModule.ModuleVersion = $module.ModuleVersion
                     $parameters.MinimumVersion = $module.ModuleVersion
-                    $packageFileName = "$packageFileName.$($module.ModuleVersion).nupkg"
 
                     if ($module.MaximumVersion) {
                         $parameters.MaximumVersion = $module.MaximumVersion -replace "\*","99999999"
                     }
                 }
                 else {
-                    $packageFileName = "$packageFileName.0.0.1.nupkg"
+                    $requiredModule.ModuleVersion = "0.0.1"
                 }
             }
 
             # Required modules must be imported in current sessionn for Test--ModuleManifest
-            Install-Module -AcceptLicense -AllowPrerelease @parameters
-            Import-Module -DisableNameChecking @parameters
+            $parameters.Force = $true
+            Install-Module $moduleName -AcceptLicense -AllowPrerelease @parameters
+            Import-Module $moduleName -DisableNameChecking @parameters
 
             # Required modules must be present in the staging repository
-            New-Item "$ArtifactsPath/$packageFileName" -Force -ItemType File
+            $tempModulePath = "$tempModulesPath/$moduleName"
+            New-Item -ItemType Directory -Path $tempModulePath | Out-Null
+            $parameters = @{
+                Author = $MyInvocation.MyCommand.Name
+                Description = "Required module for $Name"
+                ModuleVersion = $requiredModule.ModuleVersion
+                Path = "$tempModulePath/$moduleName.psd1"
+            }
+            New-ModuleManifest @parameters
+
+            # Collect path to the required module so it can be published later
+            $requiredModules += $tempModulePath
         }
     }
     catch {
@@ -167,11 +180,7 @@ Function Publish-PowerShellModule
     if ($null -ne $manifest) {
 
         # Copy files
-        $tempModulePath = Join-Path `
-            -Path (Join-Path `
-                -Path ([IO.Path]::GetTempPath()) `
-                -ChildPath ([IO.Path]::GetRandomFileName())) `
-            -ChildPath $Name
+        $tempModulePath = "$tempModulesPath/$Name"
         New-Item -ItemType Directory -Path $tempModulePath | Out-Null
 
         ForEach ($path in $manifest.FileList)
@@ -276,6 +285,13 @@ Function Publish-PowerShellModule
     }
     else {
         $repositoryName = $repositories[0].Name
+    }
+
+    # Publish required modules
+    foreach ($requiredModule in $requiredModules) {
+        Publish-Module `
+            -Path $requiredModule `
+            -Repository $repositoryName
     }
 
     Publish-Module `
