@@ -294,9 +294,20 @@ Function Publish-PowerShellModule
             -Repository $repositoryName
     }
 
-    Publish-Module `
+    $module = Publish-Module `
         -Path (Split-Path -Path $manifestPath -Parent) `
         -Repository $repositoryName
+
+    # Remove required modules from staging repository
+    $packageFileName = "$Name.$($manifest.Version)"
+    if ($prerelease) {
+        $packageFileName = "$packageFileName-$prerelease"
+    }
+    $packageFileName = "$packageFileName.nupkg"
+
+    foreach ($path in (Get-ChildItem "$ArtifactsPath/*" -Exclude $packageFileName -Include "*.nupkg")) {
+        Remove-Item $path -Force
+    }
 
     $ignore = $Error |
         Where-Object { $_.CategoryInfo.Activity -eq "Find-Package" } |
