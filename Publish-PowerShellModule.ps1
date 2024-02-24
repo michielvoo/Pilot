@@ -339,4 +339,6 @@ Function Publish-PowerShellModule
             Unregister-PSRepository $repositoryName
         }
     }
+
+    exit 0
 }
