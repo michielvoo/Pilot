@@ -294,6 +294,7 @@ Function Publish-PowerShellModule
             -Repository $repositoryName
     }
 
+    # Publish the module
     $module = Publish-Module `
         -Path (Split-Path -Path $manifestPath -Parent) `
         -Repository $repositoryName
@@ -318,11 +319,24 @@ Function Publish-PowerShellModule
         Unregister-PSRepository $repositoryName
     }
 
-    # Push package
     If ($NuGetUrl -and $NuGetApiKey)
     {
-        Get-ChildItem $ArtifactsPath "*.nupkg" | ForEach-Object {
-            Invoke-DotnetNugetPush $_.FullName -ApiKey $NuGetApiKey -SkipDuplicate -Source $NuGetUrl
+        # Publish module
+        $repositoryName = [System.Guid]::NewGuid().ToString("N").Substring(0, 8).ToUpper()
+
+        Register-PSRepository -Name $repositoryName `
+            -SourceLocation $NuGetUrl `
+            -PublishLocation $NuGetUrl `
+            -ErrorAction Stop
+
+        try {
+            Publish-Module `
+                -Path (Split-Path -Path $manifestPath -Parent) `
+                -Repository $repositoryName `
+                -NuGetApiKey $NuGetApiKey
+        }
+        finally {
+            Unregister-PSRepository $repositoryName
         }
     }
 }
