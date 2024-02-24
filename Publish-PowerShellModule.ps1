@@ -322,13 +322,18 @@ Function Publish-PowerShellModule
     If ($NuGetUrl -and $NuGetApiKey)
     {
         # Publish module
-        $repositoryName = [System.Guid]::NewGuid().ToString("N").Substring(0, 8).ToUpper()
+        $repositories = @(Get-PSRepository | Where-Object { $_.SourceLocation -eq $NuGetUrl })
 
-        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
-        Register-PSRepository -Name $repositoryName `
-            -SourceLocation $NuGetUrl `
-            -PublishLocation $NuGetUrl `
-            -ErrorAction Stop
+        if ($repositories.Length -eq 0) {
+            $unregisterRepository = $true
+            $repositoryName = [System.Guid]::NewGuid().ToString("N").Substring(0, 8).ToUpper()
+            Register-PSRepository -Name $repositoryName `
+                -SourceLocation $NuGetUrl `
+                -PublishLocation $NuGetUrl `
+                -ErrorAction Stop
+        } else {
+            $repositoryName = $repositories[0].Name
+        }
 
         try {
             Publish-Module `
@@ -337,7 +342,9 @@ Function Publish-PowerShellModule
                 -NuGetApiKey $NuGetApiKey
         }
         finally {
-            Unregister-PSRepository $repositoryName
+            if ($unregisterRepository) {
+                Unregister-PSRepository $repositoryName
+            }
         }
     }
 
