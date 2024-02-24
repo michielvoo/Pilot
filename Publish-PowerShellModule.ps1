@@ -324,7 +324,7 @@ Function Publish-PowerShellModule
         # Publish module
         $repositoryName = [System.Guid]::NewGuid().ToString("N").Substring(0, 8).ToUpper()
 
-        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        [Net.ServicePointManager]::SecurityProtocol = [Net.ServicePointManager]::SecurityProtocol -bor [Net.SecurityProtocolType]::Tls12
         Register-PSRepository -Name $repositoryName `
             -SourceLocation $NuGetUrl `
             -PublishLocation $NuGetUrl `
