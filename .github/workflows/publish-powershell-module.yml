@@ -34,6 +34,7 @@ jobs:
         with:
           fetch-depth: 2
       - name: Publish
+        id: publish
         run: |
           $InformationPreference = "continue"
           Import-Module ./Pilot.psd1
@@ -45,5 +46,5 @@ jobs:
           Write-Output "package=$packageFileName" >> "$Env:GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
-          name: ${{ steps.vars.outputs.package }}
-          path: artifacts/${{ steps.vars.outputs.package }}
+          name: ${{ steps.publish.outputs.package }}
+          path: artifacts/${{ steps.publish.outputs.package }}
