@@ -234,6 +234,10 @@ Function Publish-PowerShellModule
                         $errors += "Version in manifest does not increment $current"
                     }
                 }
+                Else
+                {
+                    $global:LastExitCode = 0
+                }
             }
             ElseIf($version -ne [Version] "0.0.1" -and $version -ne [Version] "0.1.0" -and $version -ne [Version] "1.0.0")
             {
