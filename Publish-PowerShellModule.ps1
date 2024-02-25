@@ -113,7 +113,7 @@ Function Publish-PowerShellModule
     {
         $testResult = Invoke-Pester -Configuration @{
             CodeCoverage = @{
-                Enabled = $false
+                Enabled = $true
                 OutputPath = Join-Path (&{If ($null -eq $TestArtifactsPath) {Return $ArtifactsPath} Else {Return $TestArtifactsPath}}) "coverage.xml"
             }
             Output = @{
