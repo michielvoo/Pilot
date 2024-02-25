@@ -42,6 +42,7 @@ jobs:
               -Build ${{ github.run_number }} `
               -NuGetApiKey "${{ secrets.NUGET_API_KEY }}" `
               -NuGetUrl "${{ vars.NUGET_URL }}"
+          Write-Information "Package file name is $packageFileName"
           Write-Information "artifact=$packageFileName" >> "$Env:GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
