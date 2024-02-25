@@ -310,9 +310,6 @@ Function Publish-PowerShellModule
         Remove-Item $path -Force
     }
 
-    # Provide the package's file name as pipeline output
-    Write-Output $packageFileName
-
     $ignore = $Error |
         Where-Object { $_.CategoryInfo.Activity -eq "Find-Package" } |
         Where-Object { $_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound }
@@ -351,5 +348,6 @@ Function Publish-PowerShellModule
         }
     }
 
-    exit 0
+    # Return the package's file name
+    return $packageFileName
 }
