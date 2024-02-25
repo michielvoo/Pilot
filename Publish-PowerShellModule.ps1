@@ -324,11 +324,8 @@ Function Publish-PowerShellModule
         Unregister-PSRepository $repositoryName
     }
 
-    Write-Information "NuGetUrl is $NuGetUrl and NuGetApiKey is $NuGetApiKey"
     If ($NuGetUrl -and $NuGetApiKey)
     {
-        Write-Information "Going to publish to remote repository"
-
         # Publish module
         $repositories = @(Get-PSRepository | Where-Object { $_.SourceLocation -eq $NuGetUrl })
 
