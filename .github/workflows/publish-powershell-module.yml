@@ -36,6 +36,7 @@ jobs:
       - name: Publish
         id: publish
         run: |
+          Write-Output "InformationPreference is $InformationPreference"
           $InformationPreference = "Continue"
           Import-Module ./Pilot.psd1
           $packageFileName = Publish-PowerShellModule `
