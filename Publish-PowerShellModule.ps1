@@ -345,6 +345,10 @@ Function Publish-PowerShellModule
                 -Repository $repositoryName `
                 -NuGetApiKey $NuGetApiKey
         }
+        catch {
+            Write-Error "$_"
+            Exit 1
+        }
         finally {
             if ($unregisterRepository) {
                 Unregister-PSRepository $repositoryName
