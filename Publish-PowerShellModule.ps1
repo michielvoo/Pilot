@@ -299,6 +299,7 @@ Function Publish-PowerShellModule
     }
 
     # Publish the module
+    Write-Information "Publishing $manifestPath to $repositoryName"
     $module = Publish-Module `
         -Path (Split-Path -Path $manifestPath -Parent) `
         -Repository $repositoryName
@@ -340,6 +341,7 @@ Function Publish-PowerShellModule
         }
 
         try {
+            Write-Information "Publishing $manifestPath to $repositoryName"
             Publish-Module `
                 -Path (Split-Path -Path $manifestPath -Parent) `
                 -Repository $repositoryName `
