@@ -21,7 +21,7 @@ jobs:
     steps:
       - name: Select environment
         id: select
-        run: 'Write-Output ("environment=" + ("${{ github.ref_type }}" -eq "tag" ? "PowerShell Gallery" : "MyGet")) >> "$Env:GITHUB_OUTPUT"'
+        run: 'Write-Information ("environment=" + ("${{ github.ref_type }}" -eq "tag" ? "PowerShell Gallery" : "MyGet")) >> "$Env:GITHUB_OUTPUT"'
 
   publish:
     name: Publish
@@ -34,11 +34,17 @@ jobs:
         with:
           fetch-depth: 2
       - name: Publish
+        id: publish
         run: |
+          $InformationPreference = "continue"
           Import-Module ./Pilot.psd1
-          Publish-PowerShellModule `
+          $packageFileName = Publish-PowerShellModule `
               -Ref ("${{ github.event_name }}" -eq "pull_request" ? "${{ github.head_ref }}" : "${{ github.ref_name }}") `
               -Build ${{ github.run_number }} `
               -NuGetApiKey "${{ secrets.NUGET_API_KEY }}" `
-              -NuGetUrl "${{ vars.NUGET_URL }}" `
-              -InformationAction Continue
+              -NuGetUrl "${{ vars.NUGET_URL }}"
+          Write-Output "package=$packageFileName" >> "$Env:GITHUB_OUTPUT"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.publish.outputs.package }}
+          path: artifacts/${{ steps.publish.outputs.package }}

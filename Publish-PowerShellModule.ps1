@@ -234,6 +234,10 @@ Function Publish-PowerShellModule
                         $errors += "Version in manifest does not increment $current"
                     }
                 }
+                Else
+                {
+                    $global:LastExitCode = 0
+                }
             }
             ElseIf($version -ne [Version] "0.0.1" -and $version -ne [Version] "0.1.0" -and $version -ne [Version] "1.0.0")
             {
@@ -310,9 +314,6 @@ Function Publish-PowerShellModule
         Remove-Item $path -Force
     }
 
-    # Provide the package's file name as pipeline output
-    Write-Output $packageFileName
-
     $ignore = $Error |
         Where-Object { $_.CategoryInfo.Activity -eq "Find-Package" } |
         Where-Object { $_.CategoryInfo.Category -eq [System.Management.Automation.ErrorCategory]::ObjectNotFound }
@@ -351,5 +352,6 @@ Function Publish-PowerShellModule
         }
     }
 
-    exit 0
+    # Return the package's file name
+    return $packageFileName
 }
