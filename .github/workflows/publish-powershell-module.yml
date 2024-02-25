@@ -21,7 +21,10 @@ jobs:
     steps:
       - name: Select environment
         id: select
-        run: 'Write-Information ("environment=" + ("${{ github.ref_type }}" -eq "tag" ? "PowerShell Gallery" : "MyGet")) >> "$Env:GITHUB_OUTPUT"'
+        run: |
+          $InformationPreference = "Continue"
+          $environment = "${{ github.ref_type }}" -eq "tag" ? "PowerShell Gallery" : "MyGet"
+          Write-Output "environment=$environment" >> "$Env:GITHUB_OUTPUT"
 
   publish:
     name: Publish
@@ -36,7 +39,7 @@ jobs:
       - name: Publish
         id: publish
         run: |
-          $InformationPreference = "continue"
+          $InformationPreference = "Continue"
           Import-Module ./Pilot.psd1
           $packageFileName = Publish-PowerShellModule `
               -Ref ("${{ github.event_name }}" -eq "pull_request" ? "${{ github.head_ref }}" : "${{ github.ref_name }}") `
