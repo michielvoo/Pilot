@@ -20,7 +20,7 @@ Function Publish-PowerShellModule
         [Parameter()]
         [int]$Build = ([int][Math]::Ceiling([double]::Parse((Get-Date -UFormat %s), [CultureInfo]::CurrentCulture))),
         [Parameter()]
-        [string]$ArtifactsPath = (Join-Path $Pwd "artifacts"),
+        [string]$ArtifactsPath = (Microsoft.PowerShell.Management\Join-Path $Pwd "artifacts"),
         [Parameter()]
         [string]$NuGetApiKey,
         [Parameter()]
@@ -39,7 +39,7 @@ Function Publish-PowerShellModule
     # Satisfy required modules constraints
     $requiredModules = @()
     $tempModulesPath = "$([IO.Path]::GetTempPath())/$([IO.Path]::GetRandomFileName())"
-    $manifestPath = Join-Path $Pwd "$Name.psd1"
+    $manifestPath = Microsoft.PowerShell.Management\Join-Path $Pwd "$Name.psd1"
     try {
         $manifest = Import-PowerShellDataFile $manifestPath
         foreach ($module in $manifest.RequiredModules) {
@@ -114,7 +114,7 @@ Function Publish-PowerShellModule
         $testResult = Invoke-Pester -Configuration @{
             CodeCoverage = @{
                 Enabled = $true
-                OutputPath = Join-Path (&{If ($null -eq $TestArtifactsPath) {Return $ArtifactsPath} Else {Return $TestArtifactsPath}}) "coverage.xml"
+                OutputPath = Microsoft.PowerShell.Management\Join-Path (&{If ($null -eq $TestArtifactsPath) {Return $ArtifactsPath} Else {Return $TestArtifactsPath}}) "coverage.xml"
             }
             Output = @{
                 Verbosity = "Normal"
@@ -126,7 +126,7 @@ Function Publish-PowerShellModule
             }
             TestResult = @{
                 Enabled = $true
-                OutputPath = Join-Path $ArtifactsPath "tests.xml"
+                OutputPath = Microsoft.PowerShell.Management\Join-Path $ArtifactsPath "tests.xml"
                 TestSuiteName = $Name
             }
         }
@@ -186,14 +186,14 @@ Function Publish-PowerShellModule
         ForEach ($path in $manifest.FileList)
         {
             $relativePath = Resolve-Path -Path $path -Relative
-            $absolutePath = Join-Path -Path $tempModulePath -ChildPath $relativePath
+            $absolutePath = Microsoft.PowerShell.Management\Join-Path -Path $tempModulePath -ChildPath $relativePath
             New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
             Copy-Item -Path $path -Destination $absolutePath
         }
 
         # Adjust manifest path
         $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
-        $manifestPath = Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
+        $manifestPath = Microsoft.PowerShell.Management\Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
 
         # Versioning
         [Version] $version = $manifest.Version
