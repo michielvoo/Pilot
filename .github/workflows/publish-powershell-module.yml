@@ -40,7 +40,8 @@ jobs:
         id: publish
         run: |
           $InformationPreference = "Continue"
-          Import-Module ./Pilot.psd1
+          Install-Module ./Pilot.psd1
+          Import-Module Pilot
           $packageFileName = Publish-PowerShellModule `
               -Ref ("${{ github.event_name }}" -eq "pull_request" ? "${{ github.head_ref }}" : "${{ github.ref_name }}") `
               -Build ${{ github.run_number }} `
