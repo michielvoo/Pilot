@@ -11,8 +11,6 @@
         "Invoke/Invoke-Dotnet/Invoke-DotnetNugetPush.ps1"
         "Invoke/Invoke-NativeCommand.ps1"
         "Invoke/Invoke.psm1"
-        "Pathfinder/Get-CanonicalPath.ps1"
-        "Pathfinder/Pathfinder.psm1"
         "License.txt"
         "Pilot.psd1"
         "Pilot.psm1"
@@ -26,7 +24,6 @@
     ModuleVersion = "0.0.20"
     NestedModules = @(
         "Invoke/Invoke.psm1"
-        "Pathfinder/Pathfinder.psm1"
     )
     PowerShellVersion = "5.1"
     PrivateData = @{
@@ -36,5 +33,12 @@
             Tags = @()
         }
     }
+    RequiredModules = @(
+        @{
+            Guid = "24a6a6bc-bbb1-4a22-8769-a7d9658e5065"
+            ModuleName = "Paths"
+            ModuleVersion = "0.0.1"
+        }
+    )
     RootModule = "Pilot.psm1"
 }
