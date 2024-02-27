@@ -40,12 +40,20 @@ jobs:
         id: publish
         run: |
           $InformationPreference = "Continue"
+
+          $manifest = Import-PowerShellDataFile ./Pilot.psd1
+          foreach ($module in $manifest.RequiredModules) {
+              Install-Module $module.ModuleName -Force -RequiredVersion $module.RequiredVersion
+          }
+
           Import-Module ./Pilot.psd1
+
           $packageFileName = Publish-PowerShellModule `
               -Ref ("${{ github.event_name }}" -eq "pull_request" ? "${{ github.head_ref }}" : "${{ github.ref_name }}") `
               -Build ${{ github.run_number }} `
               -NuGetApiKey "${{ secrets.NUGET_API_KEY }}" `
               -NuGetUrl "${{ vars.NUGET_URL }}"
+
           Write-Output "package=$packageFileName" >> "$Env:GITHUB_OUTPUT"
       - uses: actions/upload-artifact@v4
         with:
