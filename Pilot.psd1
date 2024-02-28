@@ -16,7 +16,7 @@
         "Publish-PowerShellModule"
     )
     GUID = "ffc50278-3ae6-4f6d-88b5-9aec7043bc27"
-    ModuleVersion = "0.0.24"
+    ModuleVersion = "0.0.25"
     PowerShellVersion = "5.1"
     PrivateData = @{
         PSData = @{
@@ -29,12 +29,12 @@
         @{
             Guid = "24a6a6bc-bbb1-4a22-8769-a7d9658e5065"
             ModuleName = "Paths"
-            ModuleVersion = "0.0.1"
+            ModuleVersion = "0.0.4"
         }
         @{
             Guid = "c0f3e85a-bf22-453a-a0ea-65b082ad6844"
             ModuleName = "Proxy.Git"
-            ModuleVersion = "0.0.1"
+            ModuleVersion = "0.0.4"
         }
     )
     RootModule = "Pilot.psm1"

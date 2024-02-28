@@ -71,7 +71,7 @@ Function Publish-PowerShellModule
                 }
             }
 
-            # Required modules must be imported in current sessionn for Test--ModuleManifest
+            # Required modules must be imported in current session for Test--ModuleManifest
             $parameters.Force = $true
             Install-Module $moduleName -AcceptLicense -AllowPrerelease @parameters
             Import-Module $moduleName -DisableNameChecking @parameters
@@ -105,6 +105,13 @@ Function Publish-PowerShellModule
     {
         $errors += $_.Exception.Message
         $Error.Clear()
+    }
+
+    # Additional manifest validation
+    foreach ($tag in $manifest.PrivateData.PSData.Tags) {
+        if ($tag.Contains(" ")) {
+            $errors += "The tag '$tag' is invalid. Tags may not contain spaces."
+        }
     }
 
     # Run tests
