@@ -22,7 +22,7 @@
         PSData = @{
             LicenseUri = "https://github.com/michielvoo/Pilot/blob/main/License.txt"
             ProjectUri = "https://github.com/michielvoo/Pilot"
-            Tags = @("AzureArtifacts", "CI", "modules", "MyGet", "PowerShellGet", "PSGallery", "this tag should not pass validation")
+            Tags = @("AzureArtifacts", "CI", "modules", "MyGet", "PowerShellGet", "PSGallery")
         }
     }
     RequiredModules = @(
