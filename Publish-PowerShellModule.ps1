@@ -71,7 +71,7 @@ Function Publish-PowerShellModule
                 }
             }
 
-            # Required modules must be imported in current sessionn for Test--ModuleManifest
+            # Required modules must be imported in current session for Test--ModuleManifest
             $parameters.Force = $true
             Install-Module $moduleName -AcceptLicense -AllowPrerelease @parameters
             Import-Module $moduleName -DisableNameChecking @parameters
