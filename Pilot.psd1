@@ -29,12 +29,12 @@
         @{
             Guid = "24a6a6bc-bbb1-4a22-8769-a7d9658e5065"
             ModuleName = "Paths"
-            ModuleVersion = "0.0.1"
+            ModuleVersion = "0.0.4"
         }
         @{
             Guid = "c0f3e85a-bf22-453a-a0ea-65b082ad6844"
             ModuleName = "Proxy.Git"
-            ModuleVersion = "0.0.1"
+            ModuleVersion = "0.0.4"
         }
     )
     RootModule = "Pilot.psm1"
