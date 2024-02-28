@@ -107,6 +107,13 @@ Function Publish-PowerShellModule
         $Error.Clear()
     }
 
+    # Additional manifest validation
+    foreach ($tag in $manifest.PrivateData.PSData.Tags) {
+        if ($tag.Contains(" ")) {
+            $errors += "The tag '$tag' is invalid. Tags may not contain spaces."
+        }
+    }
+
     # Run tests
     $hasTests = (Get-ChildItem -Path . -Filter "*.Tests.ps1" -Recurse).Count -gt 0
     If ($hasTests)
