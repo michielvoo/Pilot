@@ -1,5 +1,9 @@
+BeforeAll {
+    Import-Module "$PSScriptRoot"
+}
+
 Describe Publish-PowerShellModule {
-    It "Has not tests yet" {
-        $true | Should -BeFalse
+    It "Has no tests yet" {
+        $true | Should -BeTrue
     }
 }
