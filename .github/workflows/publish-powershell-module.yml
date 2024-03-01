@@ -36,6 +36,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 2
+
+      - name: Test
+        id: test
+        run: |
+          Invoke-Pester -Configuration @{
+             CodeCoverage = @{
+                 Enabled = $true
+             }
+             Output = @{
+                 Verbosity = "Normal"
+             }
+             Run = @{
+                 Exit = $true
+             }
+          }
+
       - name: Publish
         id: publish
         run: |
@@ -55,6 +71,7 @@ jobs:
               -NuGetUrl "${{ vars.NUGET_URL }}"
 
           Write-Output "package=$packageFileName" >> "$Env:GITHUB_OUTPUT"
+
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ steps.publish.outputs.package }}
