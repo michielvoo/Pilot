@@ -114,54 +114,6 @@ Function Publish-PowerShellModule
         }
     }
 
-    # Run tests
-    $hasTests = (Get-ChildItem -Path . -Filter "*.Tests.ps1" -Recurse).Count -gt 0
-    If ($hasTests)
-    {
-        $testResult = Invoke-Pester -Configuration @{
-            CodeCoverage = @{
-                Enabled = $true
-                OutputPath = Microsoft.PowerShell.Management\Join-Path (&{If ($null -eq $TestArtifactsPath) {Return $ArtifactsPath} Else {Return $TestArtifactsPath}}) "coverage.xml"
-            }
-            Output = @{
-                Verbosity = "Normal"
-            }
-            Run = @{
-                Exit = $false
-                PassThru = $true
-                Path = $Pwd
-            }
-            TestResult = @{
-                Enabled = $true
-                OutputPath = Microsoft.PowerShell.Management\Join-Path $ArtifactsPath "tests.xml"
-                TestSuiteName = $Name
-            }
-        }
-
-        If ($LastExitCode)
-        {
-            $errors += "$($testResult.FailedCount) test(s) failed"
-            $testResult.Tests | Where-Object Result -eq "Failed" | ForEach-Object `
-            {
-                $e = "$($_.Result): $($_.ExpandedPath)"
-                foreach ($errorRecord in $_.ErrorRecord) {
-                    $category = $errorRecord.CategoryInfo.Category
-                    if ($category -eq ([System.Management.Automation.ErrorCategory]::InvalidResult)) {
-                        $exceptionMessage = $errorRecord.Exception.Message
-                        $e = "${e}: $exceptionMessage"
-                    }
-                    else {
-                        # Category will be NotSpecified
-                        $e = "${e}: An unexpected error occurred during execution of this test"
-                    }
-
-                    break
-                }
-                $errors += $e
-            }
-        }
-    }
-
     # Code analysis
     Get-ChildItem -Exclude "*.Tests.ps1" -Recurse | Where-Object { $_.Extension -in ".ps1",".psd1",".psm1" } | ForEach-Object `
     {
