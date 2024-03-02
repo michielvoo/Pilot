@@ -25,7 +25,7 @@ jobs:
             container: null
             shell: powershell
     runs-on: ${{ matrix.runs-on }}
-    container: mcr.microsoft.com/powershell:${{ matrix.tag }}
+    container: ${{ matrix.tag && format('mcr.microsoft.com/powershell:{0}', matrix.tag) || null }}
     defaults:
       run:
         shell: ${{ matrix.shell }}
