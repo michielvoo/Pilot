@@ -19,14 +19,13 @@ jobs:
       matrix:
         tag: [lts-7.2, "7.4"]
         runs-on: [linux]
-        shell: [pwsh]
         include:
           - runs-on: windows
     runs-on: ${{ matrix.runs-on == 'linux' && 'ubuntu' || matrix.runs-on }}-latest
     container: ${{ matrix.tag && format('mcr.microsoft.com/powershell:{0}-alpine-3.17', matrix.tag) || null }}
     defaults:
       run:
-        shell: ${{ matrix.runs-on == 'windows' && 'powershell' || 'null' }}
+        shell: ${{ matrix.runs-on == 'windows' && 'powershell' || '{0}' }}
     steps:
       - uses: actions/checkout@v4
 
