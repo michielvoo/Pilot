@@ -45,7 +45,7 @@ jobs:
                  Enabled = $true
              }
              Output = @{
-                 Verbosity = "Normal"
+                 CIFormat = "None"
              }
              Run = @{
                  Exit = $true
