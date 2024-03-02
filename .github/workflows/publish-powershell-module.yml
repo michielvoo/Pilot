@@ -17,25 +17,20 @@ jobs:
     name: Test
     strategy:
       matrix:
+        tag: [lts-7.2-alpine-3.17, 7.4-alpine-3.17]
+        runs-on: ubuntu-latest
+        shell: pwsh
         include:
           - runs-on: windows-latest
             container: null
             shell: powershell
-          - runs-on: ubuntu-latest
-            container: mcr.microsoft.com/powershell:lts-7.2-alpine-3.17
-            shell: pwsh
-          - runs-on: ubuntu-latest
-            container: mcr.microsoft.com/powershell:7.4-alpine-3.17
-            shell: pwsh
     runs-on: ${{ matrix.runs-on }}
-    container: ${{ matrix.container }}
+    container: mcr.microsoft.com/powershell:${{ matrix.tag }}
     defaults:
       run:
         shell: ${{ matrix.shell }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 2
 
       - name: Test
         id: test
