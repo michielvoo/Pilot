@@ -18,8 +18,8 @@ jobs:
     strategy:
       matrix:
         tag: [lts-7.2-alpine-3.17, 7.4-alpine-3.17]
-        runs-on: ubuntu-latest
-        shell: pwsh
+        runs-on: [ubuntu-latest]
+        shell: [pwsh]
         include:
           - runs-on: windows-latest
             container: null
