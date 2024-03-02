@@ -9,6 +9,6 @@ BeforeAll {
 
 Describe Publish-PowerShellModule {
     It "Has no tests yet" {
-        $true | Should -BeTrue
+        $true | Should -BeFalse
     }
 }
