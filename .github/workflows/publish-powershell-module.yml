@@ -21,9 +21,9 @@ jobs:
           - runs-on: windows-latest
             container: null
           - runs-on: ubuntu-latest
-            container: lts-7.2-alpine-3.17
+            container: mcr.microsoft.com/powershell:lts-7.2-alpine-3.17
           - runs-on: ubuntu-latest
-            container: 7.4-alpine-3.17
+            container: mcr.microsoft.com/powershell:7.4-alpine-3.17
     runs-on: ${{ matrix.runs-on }}
     container: ${{ matrix.container }}
     steps:
