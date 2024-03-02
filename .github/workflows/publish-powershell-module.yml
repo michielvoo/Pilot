@@ -35,6 +35,7 @@ jobs:
         id: test
         run: |
           Write-Warning "PowerShell version and edition: $($PSVersionTable.PSVersion) $PSEdition"
+          Install-Module Pester -Force
           Invoke-Pester -Configuration @{
              CodeCoverage = @{
                  Enabled = $true
