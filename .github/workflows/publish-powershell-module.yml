@@ -17,18 +17,16 @@ jobs:
     name: Test
     strategy:
       matrix:
-        tag: [lts-7.2-alpine-3.17, 7.4-alpine-3.17]
-        runs-on: [ubuntu-latest]
+        tag: [lts-7.2, "7.4"]
+        runs-on: [linux]
         shell: [pwsh]
         include:
-          - runs-on: windows-latest
-            container: null
-            shell: powershell
-    runs-on: ${{ matrix.runs-on }}
-    container: ${{ matrix.tag && format('mcr.microsoft.com/powershell:{0}', matrix.tag) || null }}
+          - runs-on: windows
+    runs-on: ${{ matrix.runs-on == 'linux' && 'ubuntu' || matrix.runs-on }}-latest
+    container: ${{ matrix.tag && format('mcr.microsoft.com/powershell:{0}-alpine-3.17', matrix.tag) || null }}
     defaults:
       run:
-        shell: ${{ matrix.shell }}
+        shell: ${{ matrix.runs-on == 'windows' && 'powershell' || 'null' }}
     steps:
       - uses: actions/checkout@v4
 
