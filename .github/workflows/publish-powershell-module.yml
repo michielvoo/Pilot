@@ -19,7 +19,7 @@ jobs:
       matrix:
         version: [PowerShell 5.1, PowerShell 7.2, PowerShell 7.4]
     runs-on: ${{ matrix.version == 'PowerShell 5.1' && 'windows-latest' || 'ubuntu-latest' }}
-    container: ${{ matrix.version == 'PowerShell 5.1' && 'null' || format('mcr.microsoft.com/powershell:{0}-alpine-3.17, (endsWith(matrix.version, '7.2') && 'lts-72' || '7.4')) }}
+    container: ${{ matrix.version == 'PowerShell 5.1' && 'null' || format('mcr.microsoft.com/powershell:{0}-alpine-3.17, endsWith(matrix.version, '7.2') && 'lts-72' || '7.4') }}
     defaults:
       run:
         shell: ${{ matrix.version == 'PowerShell 5.1' && 'powershell' || 'pwsh' }}
