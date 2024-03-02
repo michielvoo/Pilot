@@ -44,9 +44,6 @@ jobs:
              CodeCoverage = @{
                  Enabled = $true
              }
-             Output = @{
-                 CIFormat = "None"
-             }
              Run = @{
                  Exit = $true
              }
