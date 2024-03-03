@@ -5,14 +5,14 @@ Function Publish-PowerShellModule
         [string]$Name = (Split-Path $Pwd -Leaf),
         [Parameter()]
         [string]$Ref = (&{
-            $Tag = Invoke-GitDescribe "HEAD" -ExactMatch -Match "v*.*.*" -Tags 2> $null
+            $Tag = (Invoke-GitDescribe "HEAD" -ExactMatch -Match "v*.*.*" -Tags).Stdout
             If ($LastExitCode -eq 0)
             {
                 Return $Tag
             }
             Else
             {
-                Return (Invoke-GitRevParse -AbbrevRef -Revisions "HEAD" 2> $null)
+                Return (Invoke-GitRevParse -AbbrevRef -Revisions "HEAD").Stdout
             }
         }),
         [Parameter()]
@@ -165,7 +165,7 @@ Function Publish-PowerShellModule
                     $errors += "Version in manifest ($version) does not match tag ($Ref)"
                 }
             }
-            ElseIf ((Invoke-GitRevList "HEAD" -Count) -gt 1)
+            ElseIf ((Invoke-GitRevList "HEAD" -Count).Stdout -gt 1)
             {
                 If ($Ref -eq $Main)
                 {
@@ -183,7 +183,8 @@ Function Publish-PowerShellModule
                 }
 
                 $path = [IO.Path]::GetTempFileName() + ".psd1"
-                Invoke-GitShow "${Revision}:$(Resolve-Path $manifestPath -Relative)" > "$path" 2> $Null
+                (Invoke-GitShow "${Revision}:$(Resolve-Path $manifestPath -Relative)").Stdout | Out-File $path
+
                 If (-Not $LastExitCode)
                 {
                     [Version] $current = (Test-ModuleManifest $path).Version
