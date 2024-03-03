@@ -37,7 +37,6 @@ jobs:
         shell: ${{ matrix.shell }}
     steps:
       - uses: actions/checkout@v4
-        with:
 
       - name: Test
         id: test
