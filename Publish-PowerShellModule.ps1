@@ -1,20 +1,17 @@
 Function Publish-PowerShellModule
 {
+    <#
+    .SYNOPSIS
+    Publish a PowerShell module to a repository
+    #>
     Param (
+        # The name of the module
         [Parameter()]
         [string]$Name = (Split-Path $Pwd -Leaf),
+
+        # The tag or current branch name
         [Parameter()]
-        [string]$Ref = (&{
-            $Tag = (Invoke-GitDescribe "HEAD" -ExactMatch -Match "v*.*.*" -Tags).Stdout
-            If ($LastExitCode -eq 0)
-            {
-                Return $Tag
-            }
-            Else
-            {
-                Return (Invoke-GitRevParse -AbbrevRef -Revisions "HEAD").Stdout
-            }
-        }),
+        [string]$Ref = (Get-ScmRevisionReference),
         [Parameter()]
         [string]$Main = "main",
         [Parameter()]
