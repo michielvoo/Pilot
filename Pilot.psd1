@@ -6,6 +6,7 @@
     Copyright = "Copyright (c) 2023 Michiel van Oosterhout"
     Description = "Pilot builds, verifies, and publishes prerelease and release versions of PowerShell modules based on version control events (branch & commit, merge, and tag), and ensures that module metadata is complete, consistent, and correct."
     FileList = @(
+        "Private/Get-ScmRevisionReference.ps1"
         "License.txt"
         "Pilot.psd1"
         "Pilot.psm1"
