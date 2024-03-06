@@ -171,7 +171,7 @@ Function Publish-PowerShellModule
                 Else
                 {
                     $revision = $Main
-                    Invoke-GitFetch -Depth 1 -RefSpecs "${Main}:$Main" -Repository "origin" -Quiet
+                    Invoke-GitFetch -Depth 1 -RefSpecs "${Main}:$Main" -Repository "origin" -Quiet | Out-Null
 
                     $topic = $Ref -replace "[^a-zA-Z0-9]",""
                     $prerelease = $topic + ("{0:000000}" -f $Build)
