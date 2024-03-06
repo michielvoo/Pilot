@@ -1,26 +1,23 @@
 Function Publish-PowerShellModule
 {
+    <#
+    .SYNOPSIS
+    Publish a PowerShell module to a repository
+    #>
     Param (
+        # The name of the module
         [Parameter()]
         [string]$Name = (Split-Path $Pwd -Leaf),
+
+        # The tag or current branch name
         [Parameter()]
-        [string]$Ref = (&{
-            $Tag = git describe --tags --exact-match --match "v*.*.*" HEAD 2> $null
-            If ($LastExitCode -eq 0)
-            {
-                Return $Tag
-            }
-            Else
-            {
-                Return (git rev-parse --abbrev-ref HEAD 2> $null)
-            }
-        }),
+        [string]$Ref = (Get-ScmRevisionReference),
         [Parameter()]
         [string]$Main = "main",
         [Parameter()]
         [int]$Build = ([int][Math]::Ceiling([double]::Parse((Get-Date -UFormat %s), [CultureInfo]::CurrentCulture))),
         [Parameter()]
-        [string]$ArtifactsPath = (Microsoft.PowerShell.Management\Join-Path $Pwd "artifacts"),
+        [string]$ArtifactsPath = (Join-Path $Pwd "artifacts"),
         [Parameter()]
         [string]$NuGetApiKey,
         [Parameter()]
@@ -39,7 +36,7 @@ Function Publish-PowerShellModule
     # Satisfy required modules constraints
     $requiredModules = @()
     $tempModulesPath = "$([IO.Path]::GetTempPath())/$([IO.Path]::GetRandomFileName())"
-    $manifestPath = Microsoft.PowerShell.Management\Join-Path $Pwd "$Name.psd1"
+    $manifestPath = Join-Path $Pwd "$Name.psd1"
     try {
         $manifest = Import-PowerShellDataFile $manifestPath
         foreach ($module in $manifest.RequiredModules) {
@@ -145,14 +142,14 @@ Function Publish-PowerShellModule
         ForEach ($path in $manifest.FileList)
         {
             $relativePath = Resolve-Path -Path $path -Relative
-            $absolutePath = Microsoft.PowerShell.Management\Join-Path -Path $tempModulePath -ChildPath $relativePath
+            $absolutePath = Join-Path $tempModulePath $relativePath
             New-Item (Split-Path $absolutePath -Parent) -ItemType Directory -Force | Out-Null
             Copy-Item -Path $path -Destination $absolutePath
         }
 
         # Adjust manifest path
         $resolvedManifestPath = Resolve-Path -Path $manifestPath -Relative
-        $manifestPath = Microsoft.PowerShell.Management\Join-Path -Path $tempModulePath -ChildPath $resolvedManifestPath -Resolve
+        $manifestPath = Join-Path $tempModulePath $resolvedManifestPath -Resolve
 
         # Versioning
         [Version] $version = $manifest.Version
@@ -165,7 +162,7 @@ Function Publish-PowerShellModule
                     $errors += "Version in manifest ($version) does not match tag ($Ref)"
                 }
             }
-            ElseIf ((git rev-list --count HEAD) -gt 1)
+            ElseIf (Get-ScmRevisionCount -gt 1)
             {
                 If ($Ref -eq $Main)
                 {
@@ -174,7 +171,7 @@ Function Publish-PowerShellModule
                 Else
                 {
                     $revision = $Main
-                    git fetch origin "${Main}:$Main" --depth=1 --quiet
+                    Invoke-GitFetch -Depth 1 -RefSpecs "${Main}:$Main" -Repository "origin" -Quiet | Out-Null
 
                     $topic = $Ref -replace "[^a-zA-Z0-9]",""
                     $prerelease = $topic + ("{0:000000}" -f $Build)
@@ -183,7 +180,8 @@ Function Publish-PowerShellModule
                 }
 
                 $path = [IO.Path]::GetTempFileName() + ".psd1"
-                git show "${Revision}:$(Resolve-Path $manifestPath -Relative)" > "$path" 2> $Null
+                (Invoke-GitShow "${Revision}:$(Resolve-Path $manifestPath -Relative)").Stdout | Out-File $path
+
                 If (-Not $LastExitCode)
                 {
                     [Version] $current = (Test-ModuleManifest $path).Version
