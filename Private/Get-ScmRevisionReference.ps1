@@ -4,7 +4,7 @@ function Get-ScmRevisionReference {
 
     if ($result.ExitCode -ne 0) {
         # Get a non-ambiguous short name of HEAD
-        $result = Invoke-GitRevParse -AbbrevRef -Revisions "HEAD"
+        $result = Invoke-GitRevParse -AbbrevRef $true -Revisions "HEAD"
     }
 
     return $result.Stdout[0]
