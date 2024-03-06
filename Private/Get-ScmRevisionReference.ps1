@@ -7,5 +7,5 @@ function Get-ScmRevisionReference {
         $result = Invoke-GitRevParse -AbbrevRef -Revisions "HEAD"
     }
 
-    return $result.Stdout
+    return $result.Stdout[0]
 }
