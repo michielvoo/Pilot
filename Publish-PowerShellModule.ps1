@@ -162,7 +162,7 @@ Function Publish-PowerShellModule
                     $errors += "Version in manifest ($version) does not match tag ($Ref)"
                 }
             }
-            ElseIf ((Invoke-GitRevList "HEAD" -Count).Stdout -gt 1)
+            ElseIf (Get-ScmRevisionCount -gt 1)
             {
                 If ($Ref -eq $Main)
                 {
